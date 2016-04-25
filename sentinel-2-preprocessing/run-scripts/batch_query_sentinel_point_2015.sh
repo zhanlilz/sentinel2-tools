@@ -44,7 +44,7 @@ OUT_URLS=( \
 "../meta-files/sioux_falls_s2_2015_urls" \
 )
 
-CMD="./query_sentinel_point_2015.sh"
+CMD="../query_sentinel_point_2015.sh"
 
 for (( i=0; i<${#LATS[@]}; ++i )); 
 do

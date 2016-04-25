@@ -19,7 +19,7 @@ OUTDIRS=( \
 "../sentinel-2-l1c/sioux-falls" \
 )
 
-CMD="./download_sentinel.sh"
+CMD="../download_sentinel.sh"
 
 # read_dom ()
 # {

@@ -30,7 +30,7 @@ CTFILES=( \
 "../meta-files/sioux_falls.corrupted" \
 )
 
-CMD="./validate_sentinel_data.sh"
+CMD="../validate_sentinel_folder.sh"
 
 for (( i=0; i<${#DATADIRS[@]}; ++i ));
 do
