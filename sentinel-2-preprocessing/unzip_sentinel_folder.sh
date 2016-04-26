@@ -16,11 +16,14 @@ Options:
 
   -m, --move, move zip file into the folder from unzipping.
 
+  -o, --overwrite, overwrite existing unzipped files.
+
 EOF
 
 
 MOVE=0
-OPTS=`getopt -o m --long move -n 'unzip_sentinel_data.sh' -- "$@"`
+OVERWRITE=0
+OPTS=`getopt -o mo --long move,overwrite -n 'unzip_sentinel_data.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options" >&2 ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true;
@@ -30,6 +33,11 @@ do
             case "${2}" in
                 "") shift 2 ;;
                 *) MOVE=1 ; shift 2 ;;
+            esac ;;
+        -o | --overwrite )
+            case "${2}" in
+                "") shift 2 ;;
+                *) OVERWRITE=1 ; shift 2 ;;
             esac ;;
         -- ) shift ; break ;;
         * ) break ;;
@@ -47,7 +55,21 @@ NUMFILES=${#ZIPFILES[@]}
 for (( i=0; i<${NUMFILES}; ++i )); 
 do
     fname=$(basename ${ZIPFILES[i]})
-    echo "<----- $((i+1)) / ${NUMFILES}: ${fname}"
+    echo -n "<----- $((i+1)) / ${NUMFILES}: ${fname}"
+
+    # if the SAFE already exists
+    SAFE="$(basename ${fname} '.zip').SAFE"
+    if [[ -d "${DATADIR}/${SAFE}" ]]; then
+        if [[ ${OVERWRITE} -eq 0 ]]; then
+            echo ", SAFE exists, skipped"
+            continue
+        else
+            rm -rf "${DATADIR}/${SAFE}"
+            echo ", SAFE exists, removed, re-unzip"
+        fi
+    else
+        echo
+    fi
 
     mkdir -p "${DATADIR}/temp"
     unzip -q ${ZIPFILES[i]} -d "${DATADIR}/temp"

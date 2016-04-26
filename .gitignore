@@ -4,6 +4,9 @@
 # runtime folder
 **/runtime
 
+# log files
+*.log
+
 # from github/gitignore/C.gitignore
 
 # Object files

@@ -1,22 +1,22 @@
 #!/bin/bash
 
 IN_URLS=( \
-"../meta-files/boulder_s2_2015_urls_1.txt" \
-"../meta-files/boundville_s2_2015_urls_1.txt" \
-"../meta-files/desert_rock_s2_2015_urls_1.txt" \
-"../meta-files/fort_peck_s2_2015_urls_1.txt" \
-"../meta-files/goodwin_creek_s2_2015_urls_1.txt" \
-"../meta-files/penn_state_s2_2015_urls_1.txt" \
-"../meta-files/sioux_falls_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/boulder_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/boundville_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/desert_rock_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/fort_peck_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/goodwin_creek_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/penn_state_s2_2015_urls_1.txt" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/meta-files/sioux_falls_s2_2015_urls_1.txt" \
 )
 OUTDIRS=( \
-"../sentinel-2-l1c/boulder" \
-"../sentinel-2-l1c/boundville" \
-"../sentinel-2-l1c/desert-rock" \
-"../sentinel-2-l1c/fort-peck" \
-"../sentinel-2-l1c/goodwin-creek" \
-"../sentinel-2-l1c/penn-state" \
-"../sentinel-2-l1c/sioux-falls" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/boulder" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/boundville" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/desert-rock" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/fort-peck" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/goodwin-creek" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/penn-state" \
+"/neponset/nbdata08/albedo/zhan.li/projects/lps-2016/sentinel-2-l1c/sioux-falls" \
 )
 
 CMD="../download_sentinel.sh"
@@ -57,7 +57,7 @@ CMD="../download_sentinel.sh"
 #     done < "${IN_URL_FILE}"    
 # }
 
-for (( i=0; i<${#IN_URLS[@]}; ++i )); 
+for (( i=3; i<${#IN_URLS[@]}; ++i )); 
 do
     if [[ ! -d ${OUTDIRS[i]} ]]; then
         mkdir -p ${OUTDIRS[i]}
@@ -66,4 +66,5 @@ do
     # dl_sentinel ${IN_URLS[i]} ${OUTDIRS[i]}
     ${CMD} -c ${IN_URLS[i]} ${OUTDIRS[i]}
     echo 
+break
 done

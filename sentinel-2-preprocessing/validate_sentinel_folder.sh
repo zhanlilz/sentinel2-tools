@@ -77,15 +77,16 @@ do
         if [[ ${SKIP} -eq 1 ]]; then
             TMP=$(grep "${bname}" ${DATADIR}/${VERIFIED_RECORD})
             if [[ $? -eq 0 ]]; then
-                echo "Skip ${fname}"
+                echo "Skip ${fname}, validated"
                 continue
             fi
         fi
 
-        echo "Verifying ${fname}"
+        echo -n "Verifying ${fname}"
         # get the checksum file
         CKSUMFILE="${bname}.md5"
         if [[ ! -f ${CKSUMDIR}/${CKSUMFILE} ]]; then
+            echo
             echo "Checksum file does not exist: ${fname}"
             continue
         fi
@@ -96,13 +97,15 @@ do
         if [[ ${O_CHECKSUM^^} != ${C_CHECKSUM^^} ]]; then
             echo ${fname} >> $CTLIST
             if [[ ${CLEAN} -eq 1 ]]; then
+                echo ", corrupted"
                 echo "Remove corrupted file: ${fname}"
                 rm -rf ${TMP1[i]}
             fi
         else
+            echo ", valid"
             echo ${fname} >> ${DATADIR}/${VERIFIED_RECORD}
         fi
 done
 
-echo "Verification done!"
-echo "=================="
+echo "Validation done!"
+echo "================"
