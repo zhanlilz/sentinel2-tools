@@ -120,6 +120,7 @@ typedef struct {
 		long zone;
 		double ulx;
 		double uly;
+  double res;
 } PARM_T;
 
 /*Global variables used in the ustats() */

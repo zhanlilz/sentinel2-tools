@@ -254,6 +254,7 @@ int OpenLndsrFile (PARM_T * parm)
         parm->ulx = ulx;
         parm->uly = uly;
         parm->zone = zone;
+        parm->res = res;
 
         printf("nrow=%d, ncol=%d\n",  parm->nlines, parm->nsamps);
         printf("utm zone=%d, ulx=%lf, uly=%lf\n", zone, ulx, uly);
@@ -451,12 +452,14 @@ int ReadLndsr(PARM_T * parm)
                         
                         for(col=0; col<parm->nsamps; col++){
                                 parm->image[row][col][i] = OneRowBuffer[col];
-                                /*
+#ifdef SNOW
                                 // allow snow temporarily
                                 if(OneRowBuffer_qa[col] == 11){
                                         ;
                                 }
-                                else */if(OneRowBuffer_qa[col] < 4 || OneRowBuffer_qa[col] > 6){
+                                else 
+#endif
+                                  if(OneRowBuffer_qa[col] < 4 || OneRowBuffer_qa[col] > 6){
                                     parm->image[row][col][i] = parm->exclude;
                                         /*printf("here, row=%d, col=%d, band=%d, cloud=%d, img=%d, exclude=%d, new=%d\n", 
                                                                                                         row, col, i, OneRowBuffer_qa[col], OneRowBuffer[col], parm->exclude,

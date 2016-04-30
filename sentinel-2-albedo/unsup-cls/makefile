@@ -5,7 +5,7 @@
 #
 # Executable name
 CC=gcc -m64
-CFLAGS=  -Wall -g
+CFLAGS=  -Wall -g -DSNOW
 
 TARGET = UnsupCls_main.exe
 

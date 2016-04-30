@@ -230,7 +230,7 @@ int main (int argc, const char **argv)
 	fprintf (fp_hdr, "\nsamples = %d\nlines   = %d\nbands   = 1\nheader offset = 0", parm.nsamps, parm.nlines);
 	fprintf (fp_hdr,
 		"\nfile type = ENVI Standard\ndata type = 1\ninterleave = bsq\nsensor type = Unknown\nbyte order = 0\nwavelength units = Unknown");
-  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, 30.0, 30.0, ",parm.ulx, parm.uly);
+        fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, %f, %f, ",parm.ulx, parm.uly, parm.res, parm.res);
   fprintf(fp_hdr," %d, North, WGS-84, units=Meters}",parm.zone);
 
 	printf ("Classification Done.\n");
