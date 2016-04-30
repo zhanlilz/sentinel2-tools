@@ -41,7 +41,7 @@ int parseParameters(char *ifile, DIS_LANDSAT *sensor, GRID_MODIS *modis)
   char  *label = NULL;
   char  *tokenptr = NULL;
   char  *seperator = "= ,",*p1=".MajCls",*p2=".Majhis",*p3="_albedo.bin", *p4="_QA.bin";
-  char tmp[MAX_STRLEN];
+  char tmp[MAX_STRLEN], oldlndalbedoName[MAX_STRLEN];
   char *tmp_fname;
   
   if((in=fopen(ifile,"r"))==NULL) {
@@ -73,7 +73,12 @@ int parseParameters(char *ifile, DIS_LANDSAT *sensor, GRID_MODIS *modis)
       else if(strcasecmp(label, "OUTPUT_ALBEDO") == 0)
 				{
 	sscanf(tokenptr, "%s ", sensor->lndalbedoName);
-				}
+        memset(oldlndalbedoName,0,sizeof(oldlndalbedoName));
+        strncpy(oldlndalbedoName, sensor->lndalbedoName,strlen(sensor->lndalbedoName));
+#ifdef SNOW
+        sprintf(sensor->lndalbedoName, "%s_snow", sensor->lndalbedoName);
+#endif
+                                }
       else if(strcasecmp(label, "OUTPUT_HIS") == 0)
 	sscanf(tokenptr, "%s ", modis->his_name);
       else if(strcasecmp(label, "RATIOMAP") == 0)
@@ -137,7 +142,7 @@ int parseParameters(char *ifile, DIS_LANDSAT *sensor, GRID_MODIS *modis)
 
   memset(tmp,0,sizeof(tmp));
   //strncpy(tmp,sensor->clsmap,strlen(sensor->clsmap)-4);
-  strncpy(tmp,sensor->lndalbedoName,strlen(sensor->lndalbedoName)-4);
+  strncpy(tmp,oldlndalbedoName,strlen(oldlndalbedoName)-4);
   tmp_fname=strcat(tmp,p4);
   strcpy(sensor->lndQAName,tmp_fname);
 

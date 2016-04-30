@@ -463,15 +463,23 @@ int PrepareCalculation (DIS_LANDSAT * sensor)
                         /* some times could be CloudFlag == 1 and SnowFlag == 1, in this case trust the snowflag */
                         /*if ((CloudFlag != 0) || (SnowFlag == 1))*/
                         //if ((CloudFlag == 1 && SnowFlag == 0))
-                        if ((CloudFlag == 1))
+#ifdef SNOW
+        // snow included
+        if (CloudFlag == 1)
+#else
+        // snow free
+        if ((CloudFlag == 1) || (CloudFlag == 2) || (SnowFlag == 1))
+#endif
                         {
                                 sensor->OneRowlndQA[j] = 10;
                                 sensor->OneRowlndSWalbedo[2 * j] = lndAlbedoFILLV;      /*shortwave Black-sky-albedo */
                                 sensor->OneRowlndSWalbedo[2 * j + 1] = lndAlbedoFILLV;  /*shortwave White-sky-albedo */
                                 continue;
                         }
+#ifdef SNOW
                         if ((SnowFlag == 1) || (CloudFlag == 2))
                                 sensor->OneRowlndQA[j] = 11;
+#endif
 
                         if ((CalculateAlbedo (sensor, tmplndPixAlbedo, i, j, &Pix_QA, SnowFlag)) == SUCCESS)
                         {

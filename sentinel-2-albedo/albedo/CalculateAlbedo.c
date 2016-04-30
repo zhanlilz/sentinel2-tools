@@ -59,6 +59,10 @@ int CalculateAlbedo (DIS_LANDSAT * sensor, double *lndPixAlbedo, int row, int co
         double LC8_n2b_lib[7] = {0.2453421, 0.050843, 0.1803945, 0.3080635, 0.1331847, 0.0521349, 0.0011052};
         double LC8_n2b_lib_snow[7] = {1.22416,-.431845,-.3446429,.3367926,.1834496,.2554519,-.0052154};
 
+        // Sentinel-2 MSI, n2b, 2016 April 29, from Qingsong Sun, Band 2, 3, 4, 8A, 11, and 12
+        double MSI_n2b_lib_sw[7] = {.2687617, .0361839, .1501418, .3044542, .164433, .0356021, -.0048673}; // inherent
+        double MSI_n2b_lib_sw_snow[7] = {-.1992158, 2.300191, -1.912122, .6714989, -2.272847, 1.934139, -.0001144}; //apparent
+
         /*double *TM_coefficents_sw = LC8_coefficents_sw;*/
         double *TM_coefficents_sw = _TM_coefficents_sw;
 
@@ -78,13 +82,21 @@ int CalculateAlbedo (DIS_LANDSAT * sensor, double *lndPixAlbedo, int row, int co
         pix_VAA =sensor->pix_VAA; /* CalPixAzimuth(sensor,row,col);*/
 
         
-        if (sensor->scene.instrument == _OLI_ || sensor->scene.instrument == MSI)
+        if (sensor->scene.instrument == _OLI_)
         {
                 TM_coefficents_sw = LC8_n2b_lib;
                 if(snow_flag != 0){
                         TM_coefficents_sw = LC8_n2b_lib_snow;
                 }
                 //TM_coefficents_sw = LC8_n2b_lib_snow;
+        }
+        else if (sensor->scene.instrument == MSI) {
+          if (snow_flag !=0) {
+            TM_coefficents_sw = MSI_n2b_lib_sw_snow;
+          }
+          else {
+            TM_coefficents_sw = MSI_n2b_lib_sw;
+          }
         }
         else
         {

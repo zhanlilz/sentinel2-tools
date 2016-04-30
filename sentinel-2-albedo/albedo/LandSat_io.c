@@ -1051,17 +1051,17 @@ int WriteOutHeadFile(DIS_LANDSAT *sensor)
   int myStrLen,i;
 
   myStrLen=strlen(sensor->lndalbedoName);
-  strncpy(tmp,sensor->lndalbedoName, myStrLen-4);
-  for (i=myStrLen-4;i<myStrLen;i++)
-    tmp[i]='\0';
-
+  /* strncpy(tmp,sensor->lndalbedoName, myStrLen-4); */
+  /* for (i=myStrLen-4;i<myStrLen;i++) */
+  /*   tmp[i]='\0'; */
+  strncpy(tmp,sensor->lndalbedoName, myStrLen);
   
   fname_hdr=strcat(tmp,".hdr");
   if (fname_hdr==NULL){
          fprintf(stderr, "\nWriteOutHeadFile: Failed at the strncat() for lndAlbedo!");
         return FAILURE;
         }
-  tmp[myStrLen+4]='\0';
+//  tmp[myStrLen+4]='\0';
   
  if((fp_hdr=fopen(fname_hdr,"w"))==NULL){
          fprintf(stderr,"\nWriteOutHeadFile:Can't create hdr file:%s.\n",fname_hdr);
@@ -1073,15 +1073,17 @@ int WriteOutHeadFile(DIS_LANDSAT *sensor)
   fprintf(fp_hdr,"\nbyte order = 0\nwavelength units = Shortwave band 300-2500nm");
   fprintf(fp_hdr,"\nband names ={\n\t(%dX%d):Shortwave band black sky albedo: Band 1,",sensor->ncols,sensor->nrows);
   fprintf(fp_hdr,"\n\t(%dX%d):Shortwave band white sky albedo: Band 2}",sensor->ncols,sensor->nrows);
-  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, 30.0, 30.0, ",sensor->ulx,sensor->uly);
+  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, %f, %f, ",sensor->ulx,sensor->uly, sensor->res, sensor->res);
   fprintf(fp_hdr," %d, North, WGS-84, units=Meters}",sensor->inzone);
   fclose(fp_hdr);
 
   /*Yanmin 2012/06 write out a head file for the lndQA file*/
   myStrLen=strlen(sensor->lndQAName);
-  strncpy(tmp,sensor->lndQAName,myStrLen-4);
-  for (i=myStrLen-4;i<myStrLen;i++)
-    tmp[i]='\0';
+  /* strncpy(tmp,sensor->lndQAName,myStrLen-4); */
+  /* for (i=myStrLen-4;i<myStrLen;i++) */
+  /*   tmp[i]='\0'; */
+  memset(tmp, 0, strlen(tmp));
+  strncpy(tmp,sensor->lndQAName,myStrLen);
     
   fname_hdr=strcat(tmp,".hdr");
    if (fname_hdr==NULL){
@@ -1098,14 +1100,14 @@ int WriteOutHeadFile(DIS_LANDSAT *sensor)
   fprintf(fp_hdr,"\nbyte order = 0\nwavelength units = Shortwave band 300-2500nm");
   fprintf(fp_hdr,"\nband names ={\n\t(%dX%d):Shortwave band QA: Band 1}",sensor->ncols,sensor->nrows);
  
-  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, 30.0, 30.0, ",sensor->ulx,sensor->uly);
+  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, %f, %f, ",sensor->ulx,sensor->uly, sensor->res, sensor->res);
   fprintf(fp_hdr," %d, North, WGS-84, units=Meters}",sensor->inzone);
   fclose(fp_hdr);
 
  /*sqs*/
 #ifdef OUT_SpectralAlbedo
  int j;
- sprintf(tmp, "%s.spec.hdr", sensor->lndalbedoName);
+ sprintf(tmp, "%s.spec.bin.hdr", sensor->lndalbedoName);
  char alb_types[2][10] = {"BSA", "WSA"};
   
  if((fp_hdr=fopen(fname_hdr,"w"))==NULL){
@@ -1126,7 +1128,7 @@ int WriteOutHeadFile(DIS_LANDSAT *sensor)
                 }
         }
         fprintf(fp_hdr, "}");
-  fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, 30.0, 30.0, ",sensor->ulx,sensor->uly);
+        fprintf(fp_hdr,"\nmap info={UTM, 1.000, 1.000, %f, %f, %f, %f, ",sensor->ulx,sensor->uly, sensor->res, sensor->res);
   fprintf(fp_hdr," %d, North, WGS-84, units=Meters}",sensor->inzone);
   fclose(fp_hdr);
 #endif
