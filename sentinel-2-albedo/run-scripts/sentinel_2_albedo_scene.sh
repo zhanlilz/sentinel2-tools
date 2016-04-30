@@ -29,6 +29,9 @@ Options
    --granule="13TDE,12SBC"; if not provided, process all granules in
    this scene.
 
+  -s, --snow, optional, turn on processing for snow pixel; default is
+   to only process snow-free pixels.
+
 EOF
 
 # number of clusters in the unsupervised classification of land covers.
@@ -37,15 +40,14 @@ ncls=10
 dir_run=`pwd`
 # where are the executables
 cmd_dir="/home/zhan.li/Workspace/src-programs/sentinel-2-tools/sentinel-2-albedo/albedo"
-cls_exe="${cmd_dir}/../unsup-cls/UnsupCls_main.exe"
-alb_exe="${cmd_dir}/lndAlbedo_main.exe"
 # where are the executable for subset modis data
 # sub_exe="/home/qsun/code/mosaic_cut_modis/sub2"
 sub_exe="/home/zhan.li/Workspace/src-programs/sentinel-2-tools/sentinel-2-albedo/mosaic_cut_modis/sub2"
 # err log file
 err=${dir_run}/err_list.log
 
-OPTS=`getopt -o m:o:g:: --long mcd43:,output-directory:,granule:: -n 'sentinel_2_albedo_scene.sh' -- "$@"`
+SNOW=0
+OPTS=`getopt -o m:o:g::s --long mcd43:,output-directory:,granule::,snow -n 'sentinel_2_albedo_scene.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true;
@@ -66,6 +68,11 @@ do
                 "") shift 2 ;;
                 *) granules=${2} ; shift 2 ;;
             esac ;;
+        -s | --snow )
+            case "${2}" in
+                "") shift 2 ;;
+                *) SNOW=1 ; shift ;;
+            esac ;;
         -- ) shift ; break ;;
         * ) break ;;
     esac
@@ -77,6 +84,18 @@ if [[ ${#} < ${MINPARAMS} ]]; then
     exit 1
 fi
 L2ADIR=${1}
+
+if [[ ${SNOW} -eq 0 ]]; then
+    cls_exe="${cmd_dir}/../unsup-cls/UnsupCls_main_snow_free.exe"
+    alb_exe="${cmd_dir}/lndAlbedo_main_snow_free.exe"
+    echo "Snow-free albedo by running program"
+else
+    cls_exe="${cmd_dir}/../unsup-cls/UnsupCls_main_snow_incl.exe"
+    alb_exe="${cmd_dir}/lndAlbedo_main_snow_incl.exe"
+    echo "Snow-included albedo by running program"
+fi
+echo "Classification: ${cls_exe}"
+echo "Albedo Calulation: ${alb_exe}"
 
 # # directory of MCD43A1*.hdf (QA flags) and MCD43A2*.hdf (BRDF data)
 # mod_dir=/neponset/nbdata06/albedo/zhan.li/modis/mcd43-v6
@@ -150,7 +169,7 @@ find_mcd43 ()
         if [ $? -ne 0 ]; then
             echo "mosaic MCD43A1 failed"
             rm -f $mod_a1
-            echo "MOSAIC1_FAIL" >> ${errlog}
+            echo "MOSAIC1_FAIL ${mod_a1}" >> ${errlog}
             return 1
         fi
     fi
@@ -161,7 +180,7 @@ find_mcd43 ()
         if [ $? -ne 0 ]; then
             echo "mosaic MCD43A2 failed"
             rm -f $mod_a2
-            echo "MOSAIC2_FAIL" >> ${errlog}
+            echo "MOSAIC2_FAIL ${mod_a2}" >> ${errlog}
             return 1
         fi
     fi
