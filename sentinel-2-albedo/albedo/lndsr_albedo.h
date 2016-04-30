@@ -12,7 +12,7 @@
 
 #include "sqs.h"
 
-#define MAX_STRLEN   400
+#define MAX_STRLEN 1024
 #define SUCCESS 1
 #define FAILURE -1
 #define GRID_ERRCODE -1 /*HDF-EOS error code*/
@@ -40,8 +40,8 @@
 
 /*#define DEBUG */
 #ifdef DEBUG
-#define DEBUG_irow 1653
-#define DEBUG_icol 4541
+#define DEBUG_irow 2467
+#define DEBUG_icol 120
 #endif
 
 #define NSCAN 375
@@ -98,7 +98,7 @@ typedef struct {
   int16 pure_thrsh[MAX_cls];
 
   uint16 **OneRowlndSR;
-  uint8 *OneRowlndSRQAData;
+  uint16 *OneRowlndSRQAData;
   int16 *OneRowlndSRAtmoData;
 	uint16 *OneRowlndSRCldData;
 	uint16 *OneRowlndSRSnwData;

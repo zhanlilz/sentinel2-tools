@@ -74,6 +74,8 @@ int open_a_band(band_t *band);
 void close_a_band(band_t *band);
 int read_a_band_a_row(band_t *band, int row, void *buf);
 int read_a_band(band_t *band, void *buf);
+
+long usgs_gctp_datum(char *name);
 int get_scene_proj(usgs_t *scene, long *sys, long *zone, long *datum, double parm[],
 								                double *ulx, double *uly, double *res);
 int convert_to_binary(usgs_t *scene);

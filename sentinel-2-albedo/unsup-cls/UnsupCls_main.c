@@ -99,7 +99,7 @@ int main (int argc, const char **argv)
 	/* open the hdf img, */
 	if (OpenLndsrFile (&parm) != UNSCLS_SUCCESS)
 	{
-		fprintf (stderr, "\nmain:OpenLndsrFile() failed!!");
+		fprintf (stderr, "\nmain:OpenLndsrFile() failed!!\n");
 		exit (1);
 	}
 
@@ -151,7 +151,6 @@ int main (int argc, const char **argv)
 	for (icls = 0; icls < parm.nclasses; icls++)
 		parm.c_order[icls] = 0;
 
-        
 	/* read the whole img data into the assigned memory */
 	ret = ReadLndsr (&parm);
 	if (ret == FAILURE)
@@ -160,7 +159,7 @@ int main (int argc, const char **argv)
 		exit (1);
 	}
 
-	printf ("zhan Classifying...\n");
+	printf ("Classifying...\n");
 	/* call the ustats() to acquire the mean vector for each intermedia cluster */
 	ustats (&parm);
 	/*printf("\n Intermediate iclusters acquired: %d\n\n", parm.iclusters); */

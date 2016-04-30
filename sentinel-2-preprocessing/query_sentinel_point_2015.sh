@@ -3,6 +3,12 @@
 # Zhan Li, zhan.li@umb.edu
 # Created: Tue Mar  8 17:44:57 EST 2016
 
+if [[ (-z ${1}) || (-z ${2}) || (-z ${3}) || (-z ${4}) ]]; then
+    echo "Missing argment!"
+    echo "query_sentinel_point_2015.sh LAT LON OUTPREFIX QUERY_RESULT"
+    exit 1
+fi
+
 LAT=${1}
 LON=${2}
 OUTPREFIX=${3}
@@ -16,7 +22,7 @@ USER="zhan.li"
 PSW="1986721615"
 DISKSPACE=$((4*1024*1024*1024*1024)) # 4T
 
-QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(${LAT}, ${LON})\" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO 2015-12-31T23:59:59.999Z] AND endPosition:[2015-06-23T00:00:00.000Z TO 2015-12-31T23:59:59.999Z] ) AND (platformname:Sentinel-2)&rows=20000&start=0"
+QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(${LAT}, ${LON})\" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO 2016-04-27T23:59:59.999Z] AND endPosition:[2015-06-23T00:00:00.000Z TO 2016-04-27T23:59:59.999Z] ) AND (platformname:Sentinel-2)&rows=20000&start=0"
 
 # # ask user to confirm the query
 # cat << EOF

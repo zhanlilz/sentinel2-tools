@@ -116,11 +116,11 @@ int main(int argc, char *argv[])
   
    //assert(0 == subset_modis(sensor, modis));
 
-  /* retrieve meta data from MODIS surface reflectance */
+  // retrieve meta data from MODIS surface reflectance
   if(getModisMetaInfo(modis)==FAILURE) {
     fprintf(stderr, "\nmain: Retrieve MODIS metadata error\n");
     exit(1);
-  }   
+  }
 
   /*Distance matrix among Classes */
   alloc_2dim_contig((void ***)(&(sensor->AmongClsDistance)),  sensor->init_ncls+1,sensor->init_ncls+1, sizeof(double));
@@ -137,8 +137,8 @@ int main(int argc, char *argv[])
   alloc_1dim_contig((void **) (&sensor->Clsdata), sensor->ncols, sizeof(int8));
  
   /* Allocate memory for one Row input lndSR, atmo,lndSRQA*/
- alloc_2dim_contig((void ***)(&(sensor->OneRowlndSR)), SENSOR_BANDS,sensor->ncols, sizeof(int16));
- alloc_1dim_contig((void **)(&(sensor->OneRowlndSRQAData)), sensor->ncols, sizeof(uint8));
+ alloc_2dim_contig((void ***)(&(sensor->OneRowlndSR)), SENSOR_BANDS,sensor->ncols, sizeof(uint16));
+ alloc_1dim_contig((void **)(&(sensor->OneRowlndSRQAData)), sensor->ncols, sizeof(uint16));
  alloc_1dim_contig((void **)(&(sensor->OneRowlndSRAtmoData)), sensor->ncols, sizeof(int16));
  alloc_1dim_contig((void **)(&(sensor->OneRowlndSRCldData)), sensor->ncols, sizeof(uint16));
  alloc_1dim_contig((void **)(&(sensor->OneRowlndSRSnwData)), sensor->ncols, sizeof(uint16));

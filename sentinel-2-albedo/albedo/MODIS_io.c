@@ -124,7 +124,6 @@ int loadModisRow(GRID_MODIS *modis, int irow)
 
 /* allocate memory, get metadata and open specific sds for Modis surface reflectance */
 int getModisMetaInfo(GRID_MODIS *modis) {
-
   char name[100];
   int i, index, ret;
   char GD_gridlist[100];
