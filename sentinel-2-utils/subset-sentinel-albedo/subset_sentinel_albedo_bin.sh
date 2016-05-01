@@ -130,9 +130,11 @@ for envi in ${lnds[@]}; do
         tile="PATH${path}_ROW${row}"
         echo ${year} ${doy} ${sensor} ${tile}
 
-        $exe $envi $lat $lon $window $year $doy $tile $sensor $base >> $out
+        tmpout=$($exe $envi $lat $lon $window $year $doy $tile $sensor $base)
         if [ $? -ne 0 ]; then
                 echo "ERROR, subsetting ${base}"
                 continue
+        else
+            echo ${tmpout} >> ${out}
         fi
 done
