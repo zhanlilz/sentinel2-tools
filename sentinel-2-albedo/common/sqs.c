@@ -366,10 +366,12 @@ int parse_usgs_xml(char *fname, usgs_t *scene)
         }
 
         if(0 != get_element_value(&(strXml[a]), "zone_code", NULL, strTmp)){
-                free(strXml);
-                return -3;
+                printf("Warning: no zone_code found in the xml!\n");
+                // free(strXml);
+                // return -3;
+        } else {
+          scene->zone = atoi(strTmp);
         }
-        scene->zone = atoi(strTmp);
 
         int iBand = 0;
         a += find_next_element(&(strXml[a]), "bands");
@@ -1063,31 +1065,79 @@ long usgs_gctp_datum(char *name)
 int get_scene_proj(usgs_t *scene, long *sys, long *zone, long *datum, double parm[],
                                                                                 double *ulx, double *uly, double *res)
 {
-        // from xml
-        if(strcmp(scene->projection, "UTM") != 0){
-                return -3;
-        }
-
-        *sys = GCTP_UTM;
-
-        char *datumname, *p;
-        datumname = strdup(scene->datum); p=datumname;
-        while (toupper(*p)){
-          *p++;
-        }
-        *datum = usgs_gctp_datum(datumname);
-        if (*datum == -1){
-          return -3;
-        }
-
-        *zone = scene->zone;
-        *ulx = scene->ulx;
-        *uly = scene->uly;
-        *res = scene->band[0].pixel_size;
         int i;
-        for(i=0; i<15; i++){
-                parm[i] = 0.0;
+        int index = scene->srf_band_index[0];
+
+        printf("%d\n", index);
+        printf("%s\n", scene->band[index].file_name);
+        printf("%s\n", scene->band[index].name);
+
+        if(scene->band[index].file_format == TIF){
+                if(0 != open_a_band(&(scene->band[index]))){
+                        printf("get_scene_proj: Open band %s failed.\n", scene->band[index].file_name);
+                        close_a_band(&(scene->band[index]));
+                        return -1;
+                }
+                if(0 != get_geo_info_gdal(scene->band[index].hDataset, sys, zone, datum, parm, ulx, uly, res)){
+                  close_a_band(&(scene->band[index]));
+                  return -1;
+                }
+                close_a_band(&(scene->band[index]));
+                return 0;
+        }
+        else if(scene->band[index].file_format == HDF){
+                if(0 != get_geo_info_hdf(scene->band[index].file_name, sys, zone, datum, parm, ulx, uly, res)){
+                        return -2;
+                }
+                return 0;
+        }
+        else if(scene->band[index].file_format == BIN){
+                // try to find the hdf
+                char fhdf[1024];
+                strcpy(fhdf, scene->xml_file);
+                for(i=strlen(fhdf)-1; i>=0; i--){
+                        if(fhdf[i] == '.'){
+                                fhdf[i] = '\0';
+                                break;
+                        }
+                }
+                strcat(fhdf, ".hdf");
+                if(0 == get_geo_info_hdf(fhdf, sys, zone, datum, parm, ulx, uly, res)){
+                        return 0;
+                }
+
+                // from xml
+                if(strcmp(scene->projection, "UTM") == 0){
+                  *sys = GCTP_UTM;
+                } else if (strcmp(scene->projection, "PS") == 0) {
+                  *sys = GCTP_PS;
+                  // assign zone code here for non-UTM projection
+                  scene->zone = 0;
+                } else {
+                  return -3;
+                }
+
+                char *datumname, *p;
+                datumname = strdup(scene->datum); p=datumname;
+                while (toupper(*p)){
+                  *p++;
+                }
+                *datum = usgs_gctp_datum(datumname);
+                if (*datum == -1){
+                  return -3;
+                }
+
+                *zone = scene->zone;
+                *ulx = scene->ulx;
+                *uly = scene->uly;
+                *res = scene->band[0].pixel_size;
+                int i;
+                for(i=0; i<15; i++){
+                        parm[i] = 0.0;
+                }
+
+                return 0;
         }
 
-        return 0;
+        return -9;
 }
