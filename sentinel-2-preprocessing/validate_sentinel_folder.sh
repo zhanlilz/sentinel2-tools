@@ -115,10 +115,15 @@ do
 
     echo -n "Verifying $((i+1)) / ${NUMFILES}: ${fname}"
     # get the checksum file
-    CKSUMFILE="${fname}.md5"
+    if [[ ${DLTYPE} == "zip" ]]; then
+        CKSUMFILE="$(dirname ${fname})/$(basename ${fname} .zip)"".md5"
+    else
+        CKSUMFILE="${fname}.md5"
+    fi
+
     if [[ ! -f ${CKSUMFILE} ]]; then
         echo
-        echo "Checksum file does not exist: ${fname}"
+        echo "Checksum file does not exist: ${CKSUMFILE}"
         continue
     fi
     

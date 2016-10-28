@@ -6,12 +6,13 @@
 # -------------------------------------
 ### user inputs, change as you need ###
 # the string for opensearch on Sentinel Data Hub. See instructions at https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/5APIsAndBatchScripting#Open_Search
-QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))\" OR footprint:\"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))\" ) AND ( beginPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] AND endPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)&rows=10000&start=0"
+# QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))\" OR footprint:\"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))\" ) AND ( beginPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] AND endPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)&rows=10000&start=0"
+QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))\" OR footprint:\"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))\" ) AND ( beginPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] AND endPosition:[2016-01-01T00:00:00.000Z TO 2016-01-31T23:59:59.999Z] ) AND (platformname:Sentinel-2)&rows=10000&start=0"
 # the prefix of output list of found files, including the file path
 OUTPREFIX="../test-meta/test" # in the Disk D, directory "sentinel" -> "test-meta", output file will start with prefix "test"
 USER="zhan.li" # your user name on Sentinel Data Hub
 PSW="your_pass_word" # your password on Sentinel Data Hub
-DISKSPACE=$((4*1024*1024*1024*1024)) # 4T disk space, the disk space you have to hold the downloaded data before uncompressing them, in unit of bytes.
+DISKSPACE=$((16*1024*1024*1024*1024)) # 4T disk space, the disk space you have to hold the downloaded data before uncompressing them, in unit of bytes.
 ### end of user inputs ###
 # -------------------------------------
 

@@ -34,52 +34,74 @@
 
 int g_print = 0;
 
-int Sensor2MODIS(DIS_LANDSAT *sensor, int irow, int icol, GRID_MODIS *modis, int *mrow, int *mcol)
+int
+Sensor2MODIS (DIS_LANDSAT * sensor, int irow, int icol, GRID_MODIS * modis,
+							int *mrow, int *mcol)
 {
-  double incoor[2];
-  double outcoor[2];
-  long ipr = 0;
-  long jpr = 999;
-  long flg=1;
-  double lon=0.0,lat=0.0,x,y;
+	double incoor[2];
+	double outcoor[2];
+	long ipr = 0;
+	long jpr = 999;
+	long flg = 1;
+	double lon = 0.0, lat = 0.0, x, y;
 
-	if(0 != SetupSpace(sensor->insys, sensor->inzone, sensor->inparm, sensor->indatum, sensor->ulx, sensor->uly, (double)sensor->res)){
-		printf("set up sensor space failed. sys=%d, zone=%d, datum=%d, ulx=%f, uly=%f, res=%f\n",
-						sensor->insys, sensor->inzone, sensor->indatum, sensor->ulx, sensor->uly, sensor->res);
-		return FAILURE;
-	}
-	if(0 != FromSpace((double)irow, (double)icol, &lat, &lon)){
-		printf("from space failed.\n");
-		return FAILURE;
-	}
-	
-	if(0 != SetupSpace(modis->GD_projcode, modis->GD_zonecode,modis->GD_projparm, modis->GD_datum, modis->ulx, modis->uly, (double)modis->res)){
-		printf("set up modis space failed.\n");
-		return FAILURE;
-	}
-	if(0 != ToSpace(lat, lon, &y, &x)){
-		printf("to space failed.\n");
-		return FAILURE;
-	}
-
-	*mrow = (int)y;
-	*mcol = (int)x;
-
-  if(*mrow<0 || *mrow>=modis->nrows || *mcol<0 || *mcol>=modis->ncols) {
-		if(g_print == 0){
-			printf("\nWARNING! lrow=%d, lcol=%d, mrow=%d, mcol=%d, mrows=%d, mcols=%d\n", irow, icol, *mrow, *mcol, modis->nrows, modis->ncols);
-			printf("  lat=%f, lon=%f\n", lat, lon);
-			printf("  ULX=%f, ULY=%f, INSYS=%d, INZONE=%d, INDATUM=%d, PARMS=", sensor->ulx, sensor->uly, sensor->insys,sensor->inzone,sensor->indatum);
-			int i;
-			for(i=0; i<15; i++){
-				printf("%f,", sensor->inparm[i]);
-			}
-			printf("\n");
-			g_print = 1;
+	if (0 !=
+			SetupSpace (sensor->insys, sensor->inzone, sensor->inparm,
+									sensor->indatum, sensor->ulx, sensor->uly,
+									(double) sensor->res))
+		{
+			printf
+				("set up sensor space failed. sys=%d, zone=%d, datum=%d, ulx=%f, uly=%f, res=%f\n",
+				 sensor->insys, sensor->inzone, sensor->indatum, sensor->ulx,
+				 sensor->uly, sensor->res);
+			return FAILURE;
 		}
-    return FAILURE;
-	}
-  else
-    return SUCCESS;
-  
+	if (0 != FromSpace ((double) irow, (double) icol, &lat, &lon))
+		{
+			printf ("from space failed.\n");
+			return FAILURE;
+		}
+
+	if (0 !=
+			SetupSpace (modis->GD_projcode, modis->GD_zonecode, modis->GD_projparm,
+									modis->GD_datum, modis->ulx, modis->uly,
+									(double) modis->res))
+		{
+			printf ("set up modis space failed.\n");
+			return FAILURE;
+		}
+	if (0 != ToSpace (lat, lon, &y, &x))
+		{
+			printf ("to space failed.\n");
+			return FAILURE;
+		}
+
+	*mrow = (int) y;
+	*mcol = (int) x;
+
+	if (*mrow < 0 || *mrow >= modis->nrows || *mcol < 0
+			|| *mcol >= modis->ncols)
+		{
+			if (g_print == 0)
+				{
+					printf
+						("\nWARNING! lrow=%d, lcol=%d, mrow=%d, mcol=%d, mrows=%d, mcols=%d\n",
+						 irow, icol, *mrow, *mcol, modis->nrows, modis->ncols);
+					printf ("  lat=%f, lon=%f\n", lat, lon);
+					printf ("  ULX=%f, ULY=%f, INSYS=%d, INZONE=%d, INDATUM=%d, PARMS=",
+									sensor->ulx, sensor->uly, sensor->insys, sensor->inzone,
+									sensor->indatum);
+					int i;
+					for (i = 0; i < 15; i++)
+						{
+							printf ("%f,", sensor->inparm[i]);
+						}
+					printf ("\n");
+					g_print = 1;
+				}
+			return FAILURE;
+		}
+	else
+		return SUCCESS;
+
 }

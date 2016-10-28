@@ -41,8 +41,8 @@ Developers: Yanmin Shuai  (ERT Inc. and NASA, Yanmin.Shuai@ertcorp.com)
 #include <stdlib.h>
 #include <math.h>
 #include <strings.h>
-#include <float.h> 	/* floats */
-#include <time.h>	/* C time functions */
+#include <float.h>							/* floats */
+#include <time.h>								/* C time functions */
 
 #include <limits.h>
 
@@ -51,7 +51,7 @@ Developers: Yanmin Shuai  (ERT Inc. and NASA, Yanmin.Shuai@ertcorp.com)
 #include "sqs.h"
 
 #define OK		1
-#define ERROR		(-2)	/* from IPW version 1.0 */
+#define ERROR		(-2)						/* from IPW version 1.0 */
 
 /* HDF and HDF-EOS headers for MET and HDF reading : */
 #include "hdf.h"
@@ -92,35 +92,36 @@ Developers: Yanmin Shuai  (ERT Inc. and NASA, Yanmin.Shuai@ertcorp.com)
 #endif
 
 /* Data structure definition */
-typedef struct {
-    char	filename[4*MODERATE_ALLOC]; 	/*lndsr hdf format file name*/
-    char  Clsmapname[4*MODERATE_ALLOC]; /*output class map name*/
-    char Distfilename[4*MODERATE_ALLOC]; /*output the distance matix in the spectral space among final unsupervised classes*/
-    int32	fp_id;	/* HDF scientific data handler	 */
-    int32	sr_id[7];  /* sds handler for lndsr        */
-    int	nlines;	/* #lines / image		 */
-    int	nsamps;	/* #samples / line	 	 */
-    int	nbands;	/* #bands / sample	 	 */
-    int	*c_npixels;	/* #pixels[cluster]  */
-    int	*c_order;	/* cluster ordering, most populous first */
-    int	nclasses;	/* # final classes   */
-    int	nclusters;	/* max # intermediate clusters   */
-    int	iclusters;	/* current # intermediate clusters */
-    int	exclude;	/* pixel exclusion value */
-  double scalefactor; /*scale fatcor for lndSR data*/
-    int	exclusion;	/* use exclusion value */
-    double radius;	/* cluster threshold radius */
-    double radius2;/* cluster threshold radius squared */
-    int16 ***image; /* [nlines][nsamps][band]input image to be clustered */
-    double **sum_x;	/* sum[cluster][band]		 */
-    double **mean_x;	/* mean[cluster][band]		 */
-    double ***sum_xy;	/* sum[cluster][band][band]	 */
-   
-	  usgs_t scene;	
-		long zone;
-		double ulx;
-		double uly;
-  double res;
+typedef struct
+{
+	char filename[4 * MODERATE_ALLOC];	/*lndsr hdf format file name */
+	char Clsmapname[4 * MODERATE_ALLOC];	/*output class map name */
+	char Distfilename[4 * MODERATE_ALLOC];	/*output the distance matix in the spectral space among final unsupervised classes */
+	int32 fp_id;									/* HDF scientific data handler   */
+	int32 sr_id[7];								/* sds handler for lndsr        */
+	int nlines;										/* #lines / image    */
+	int nsamps;										/* #samples / line     */
+	int nbands;										/* #bands / sample     */
+	int *c_npixels;								/* #pixels[cluster]  */
+	int *c_order;									/* cluster ordering, most populous first */
+	int nclasses;									/* # final classes   */
+	int nclusters;								/* max # intermediate clusters   */
+	int iclusters;								/* current # intermediate clusters */
+	int exclude;									/* pixel exclusion value */
+	double scalefactor;						/*scale fatcor for lndSR data */
+	int exclusion;								/* use exclusion value */
+	double radius;								/* cluster threshold radius */
+	double radius2;								/* cluster threshold radius squared */
+	int16 ***image;								/* [nlines][nsamps][band]input image to be clustered */
+	double **sum_x;								/* sum[cluster][band]    */
+	double **mean_x;							/* mean[cluster][band]     */
+	double ***sum_xy;							/* sum[cluster][band][band]  */
+
+	usgs_t scene;
+	long zone;
+	double ulx;
+	double uly;
+	double res;
 } PARM_T;
 
 /*Global variables used in the ustats() */
@@ -133,35 +134,36 @@ static int pow2exp;
 static int myindex;
 
 /* function prototyping */
- int main(); 
- int GetLine(FILE *fp,char *s);
- int GetParam(FILE *fp, PARM_T *p );
- int SubString(char *str_ptr,unsigned int str_start,unsigned int str_end,char *p);
- int StringTrim(char *in,char *out);
- 
- int OpenLndsrFile(PARM_T *parm);
- int ReadLndsr(PARM_T *parm);
- int CloseLndsr(PARM_T *parm);
- int ShortestDisCls(int row, int col, PARM_T *parm);
- int MergeCls(PARM_T *parm);
- int Find2ClsWithMiniDis( int *loc_a, int *loc_b, PARM_T *parm);
- 
+int main ();
+int GetLine (FILE * fp, char *s);
+int GetParam (FILE * fp, PARM_T * p);
+int SubString (char *str_ptr, unsigned int str_start, unsigned int str_end,
+							 char *p);
+int StringTrim (char *in, char *out);
+
+int OpenLndsrFile (PARM_T * parm);
+int ReadLndsr (PARM_T * parm);
+int CloseLndsr (PARM_T * parm);
+int ShortestDisCls (int row, int col, PARM_T * parm);
+int MergeCls (PARM_T * parm);
+int Find2ClsWithMiniDis (int *loc_a, int *loc_b, PARM_T * parm);
+
 void alloc_1dim_contig (void **, int, int);
 void alloc_2dim_contig (void ***, int, int, int);
 void alloc_3dim_contig (void ****, int, int, int, int);
 void alloc_4dim_contig (void *****, int, int, int, int, int);
 
-int AllocateEarlyVars(PARM_T *parm);
+int AllocateEarlyVars (PARM_T * parm);
 
-void free_2dim_contig  (void **);
-void free_3dim_contig  (void ***);
-void free_4dim_contig  (void ****);
-void  accum(int cndx, int16 *pixel, PARM_T *parm);
-void  ustats(PARM_T *parm);
-void  start_pixel(int l, int s);
-int  next_pixel(int *pline, int *psamp);
-int  find_cluster(int l, int s, PARM_T *parm);
-void  add_to_cluster(int16 *pvec, PARM_T *parm);
-void  make_new_cluster(int16 *pvec, PARM_T *parm);
-void  mcov(PARM_T *parm);
-int ipow2(int expo);
+void free_2dim_contig (void **);
+void free_3dim_contig (void ***);
+void free_4dim_contig (void ****);
+void accum (int cndx, int16 * pixel, PARM_T * parm);
+void ustats (PARM_T * parm);
+void start_pixel (int l, int s);
+int next_pixel (int *pline, int *psamp);
+int find_cluster (int l, int s, PARM_T * parm);
+void add_to_cluster (int16 * pvec, PARM_T * parm);
+void make_new_cluster (int16 * pvec, PARM_T * parm);
+void mcov (PARM_T * parm);
+int ipow2 (int expo);

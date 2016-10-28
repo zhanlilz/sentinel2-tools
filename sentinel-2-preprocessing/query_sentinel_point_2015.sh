@@ -22,7 +22,7 @@ USER="zhan.li"
 PSW="1986721615"
 DISKSPACE=$((4*1024*1024*1024*1024)) # 4T
 
-QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(${LAT}, ${LON})\" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO 2016-04-27T23:59:59.999Z] AND endPosition:[2015-06-23T00:00:00.000Z TO 2016-04-27T23:59:59.999Z] ) AND (platformname:Sentinel-2)&rows=20000&start=0"
+QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects(${LAT}, ${LON})\" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)&rows=20000&start=0"
 
 # # ask user to confirm the query
 # cat << EOF
@@ -54,7 +54,7 @@ QUERY_STR="https://scihub.copernicus.eu/dhus/search?q=( footprint:\"Intersects($
 
 echo "Start querying ..."
 
-wget --no-check-certificate --user=zhan.li --password=1986721615 --output-file=../meta-files/.log_query.log -O $QUERY_RESULT "${QUERY_STR}"
+wget --no-check-certificate --user=zhan.li --password=1986721615 -O ${QUERY_RESULT} "${QUERY_STR}"
 
 echo "Parsing query results ..."
 # find the start line of the found entries

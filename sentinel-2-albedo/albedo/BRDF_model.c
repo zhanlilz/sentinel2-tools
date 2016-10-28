@@ -30,15 +30,11 @@
 
 /*****************************************************************/
 void
-GetPhaseAngle (
-		 double cos1,
-		 double cos2,
-		 double sin1,
-		 double sin2,
-		 double cos3,
-		 double *cosres,
-		 double *res,
-		 double *sinres)
+GetPhaseAngle (double cos1,
+							 double cos2,
+							 double sin1,
+							 double sin2,
+							 double cos3, double *cosres, double *res, double *sinres)
 /*
 !C****************************************************************************
 
@@ -64,21 +60,17 @@ The function returns an int status qualifying success.
 !END**************************************************************************
 */
 {
-   *cosres = cos1 * cos2 + sin1 * sin2 * cos3;
-   *res = acos (MAX (-1., MIN (1., *cosres)));
-   *sinres = sin (*res);
+	*cosres = cos1 * cos2 + sin1 * sin2 * cos3;
+	*res = acos (MAX (-1., MIN (1., *cosres)));
+	*sinres = sin (*res);
 
-   return;
+	return;
 }
 
 /*--------------------------------------------------------------------*/
 
 void
-GetDistance (
-	       double tan1,
-	       double tan2,
-	       double cos3,
-	       double *res)
+GetDistance (double tan1, double tan2, double cos3, double *res)
 /*
 !C****************************************************************************
 
@@ -104,23 +96,19 @@ The function returns an int status qualifying success.
 !END**************************************************************************
 */
 {
-   double temp = 0.;
+	double temp = 0.;
 
-   temp = tan1 * tan1 + tan2 * tan2 - 2. * tan1 * tan2 * cos3;
-   *res = sqrt (MAX (0., temp));
+	temp = tan1 * tan1 + tan2 * tan2 - 2. * tan1 * tan2 * cos3;
+	*res = sqrt (MAX (0., temp));
 
-   return;
+	return;
 }
 
 /*--------------------------------------------------------------------*/
 
 void
-GetpAngles (
-	      double brratio,
-	      double tan1,
-	      double *sinp,
-	      double *cosp,
-	      double *tanp)
+GetpAngles (double brratio,
+						double tan1, double *sinp, double *cosp, double *tanp)
 /*
 !C****************************************************************************
 
@@ -144,31 +132,27 @@ The function returns an int status qualifying success.
 
 !END************************************************************************ */
 {
-   double angp = 0.;
+	double angp = 0.;
 
-   *tanp = brratio * tan1;
-   if (*tanp < 0)
-      *tanp = 0.;
-   angp = atan (*tanp);
-   *sinp = sin (angp);
-   *cosp = cos (angp);
+	*tanp = brratio * tan1;
+	if (*tanp < 0)
+		*tanp = 0.;
+	angp = atan (*tanp);
+	*sinp = sin (angp);
+	*cosp = cos (angp);
 
-   return;
+	return;
 }
 
 /*--------------------------------------------------------------------*/
 
 void
-GetOverlap (
-	      double hbratio,
-	      double distance,
-	      double cos1,
-	      double cos2,
-	      double tan1,
-	      double tan2,
-	      double sin3,
-	      double *overlap,
-	      double *temp)
+GetOverlap (double hbratio,
+						double distance,
+						double cos1,
+						double cos2,
+						double tan1,
+						double tan2, double sin3, double *overlap, double *temp)
 /*
 !C****************************************************************************
 
@@ -196,89 +180,96 @@ The function returns an int status qualifying success.
 !END**************************************************************************
 */
 {
-   double cost = 0., sint = 0., tvar = 0.;
-   double pi=3.1415926535;
-   
-   *temp = 1. / cos1 + 1. / cos2;
-   cost = hbratio * sqrt (distance * distance + tan1 * tan1 * tan2 * tan2 * sin3 * sin3) /
-      *temp;
-   cost = MAX (-1., MIN (1., cost));
-   tvar = acos (cost);
-   sint = sin (tvar);
-   *overlap = 1. / pi * (tvar - sint * cost) * (*temp);
-   *overlap = MAX (0., *overlap);
+	double cost = 0., sint = 0., tvar = 0.;
+	double pi = 3.1415926535;
 
-   return;
+	*temp = 1. / cos1 + 1. / cos2;
+	cost =
+		hbratio * sqrt (distance * distance +
+										tan1 * tan1 * tan2 * tan2 * sin3 * sin3) / *temp;
+	cost = MAX (-1., MIN (1., cost));
+	tvar = acos (cost);
+	sint = sin (tvar);
+	*overlap = 1. / pi * (tvar - sint * cost) * (*temp);
+	*overlap = MAX (0., *overlap);
+
+	return;
 }
 
-double RossThick_kernel(double tv, double ti, double phi)
+double
+RossThick_kernel (double tv, double ti, double phi)
 /*
 units of three input angles: radiance 
 
 */
 {
-   double costv = -999.;
-   double sintv = -999.;
-   double costi = -999.;
-   double sinti = -999.;
-   double cosphi = 0.;
-   double sinphi = 0.;
-   
-   double phaang = 0.;
-   double cosphaang = 0.;
-   double sinphaang = 0.;
-   double rosselement = 0.;
-   
-  double kernelV;
-  double pi=3.1415926535;
-	
-   cosphi=cos(phi);
-   sinphi=sin(phi);
-   costv=cos(tv);
-   sintv=sin(tv);
-   costi=cos(ti);
-   sinti=sin(ti);
+	double costv = -999.;
+	double sintv = -999.;
+	double costi = -999.;
+	double sinti = -999.;
+	double cosphi = 0.;
+	double sinphi = 0.;
 
-  GetPhaseAngle(costv, costi,sintv,sinti,cosphi,&cosphaang,&phaang, &sinphaang);
+	double phaang = 0.;
+	double cosphaang = 0.;
+	double sinphaang = 0.;
+	double rosselement = 0.;
 
-   rosselement = (pi/ 2. - phaang) * cosphaang + sinphaang;
+	double kernelV;
+	double pi = 3.1415926535;
 
-   kernelV=rosselement / (costi + costv) - pi / 4.;
+	cosphi = cos (phi);
+	sinphi = sin (phi);
+	costv = cos (tv);
+	sintv = sin (tv);
+	costi = cos (ti);
+	sinti = sin (ti);
 
-   return kernelV;
+	GetPhaseAngle (costv, costi, sintv, sinti, cosphi, &cosphaang, &phaang,
+								 &sinphaang);
+
+	rosselement = (pi / 2. - phaang) * cosphaang + sinphaang;
+
+	kernelV = rosselement / (costi + costv) - pi / 4.;
+
+	return kernelV;
 
 }
 
 
-double LiSparseR_kernel(double tv, double ti, double phi)
+double
+LiSparseR_kernel (double tv, double ti, double phi)
 {
-   float brratio=1.0,hbratio=2.0;
-   double tantv = 0.,tanti = 0.;
-   double cosphi=0.,sinphi=0.;
+	float brratio = 1.0, hbratio = 2.0;
+	double tantv = 0., tanti = 0.;
+	double cosphi = 0., sinphi = 0.;
 
-   double sintvp = 0., costvp = 0., tantvp = 0., sintip = 0., costip = 0., tantip = 0.;
-   double phaangp = 0., cosphaangp = 0., sinphaangp = 0., distancep = 0.;
-   double overlap = 0., temp = 0.;
+	double sintvp = 0., costvp = 0., tantvp = 0., sintip = 0., costip =
+		0., tantip = 0.;
+	double phaangp = 0., cosphaangp = 0., sinphaangp = 0., distancep = 0.;
+	double overlap = 0., temp = 0.;
 
-   double kernelV;
+	double kernelV;
 
-   cosphi=cos(phi);
-   sinphi=sin(phi);
-   
-    if(cos(tv)!=0)
-     		tantv = sin(tv)/cos(tv);
-    
-     if(cos(ti)!=0)
-     		tanti = sin(ti)/cos(ti);
+	cosphi = cos (phi);
+	sinphi = sin (phi);
 
-   GetpAngles (brratio, tantv, &sintvp, &costvp, &tantvp);
-   GetpAngles (brratio, tanti, &sintip, &costip, &tantip);
-   GetPhaseAngle (costvp, costip, sintvp, sintip, cosphi, &cosphaangp, &phaangp, &sinphaangp);
-   GetDistance (tantvp, tantip, cosphi, &distancep);
-   GetOverlap (hbratio, distancep, costvp, costip, tantvp, tantip, sinphi, &overlap, &temp);
+	if (cos (tv) != 0)
+		tantv = sin (tv) / cos (tv);
 
-   kernelV=overlap - temp + 1. / 2. * (1. + cosphaangp) / costvp / costip;
+	if (cos (ti) != 0)
+		tanti = sin (ti) / cos (ti);
 
-   return kernelV;
+	GetpAngles (brratio, tantv, &sintvp, &costvp, &tantvp);
+	GetpAngles (brratio, tanti, &sintip, &costip, &tantip);
+	GetPhaseAngle (costvp, costip, sintvp, sintip, cosphi, &cosphaangp,
+								 &phaangp, &sinphaangp);
+	GetDistance (tantvp, tantip, cosphi, &distancep);
+	GetOverlap (hbratio, distancep, costvp, costip, tantvp, tantip, sinphi,
+							&overlap, &temp);
+
+	kernelV = overlap - temp + 1. / 2. * (1. + cosphaangp) / costvp / costip;
+
+	return kernelV;
 
 }

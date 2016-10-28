@@ -13,7 +13,8 @@
 #define UL_X -20015109.354
 #define UL_Y 10007554.677
 #define PIX_SIZE 463.3127165277778
-double PROJ_PARAM[15]  = {6371007.181,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+double PROJ_PARAM[15] =
+	{ 6371007.181, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 #define UTM_ZONE -1
 
 #define TILE_SIZE 1111950.519666667
@@ -22,23 +23,26 @@ double PROJ_PARAM[15]  = {6371007.181,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 #define GLOBAL_NROW (TILE_NROW * 18)
 #define	GLOBAL_NCOL (TILE_NCOL * 36)
 
-typedef struct{
+typedef struct
+{
 	int row;
 	int col;
-}Point;
+} Point;
 
-typedef struct{
+typedef struct
+{
 	Point upper_left;
 	Point upper_right;
-	Point lower_right;	
-	Point lower_left;	
-}Region;
+	Point lower_right;
+	Point lower_left;
+} Region;
 
-typedef struct{
+typedef struct
+{
 	int h;
 	int v;
 	int row;
 	int col;
-}TilePoint;
+} TilePoint;
 
 #endif
