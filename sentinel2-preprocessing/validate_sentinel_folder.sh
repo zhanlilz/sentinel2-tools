@@ -1,7 +1,7 @@
 #!/bin/bash
 
 read -d '' USAGE <<EOF 
-validate_sentinel_folder_bn.sh [options] SEN_DATA_DIR COR_FILE
+validate_sentinel_folder_bnu.sh [options] SEN_DATA_DIR COR_FILE
 
 Validate the integrity of Sentinel data files in the folder SEN_DATA_DIR and
 write the list of corrupted file names to an ASCII file COR_FILE
@@ -22,7 +22,7 @@ EOF
 VERIFIED_RECORD="checksum_verified"
 
 CLEAN=0
-OPTS=`getopt -o cp:: --long clean,pattern:: -n 'verify_data_integrity.sh' -- "$@"`
+OPTS=`getopt -o cp:: --long clean,pattern:: -n 'validate_sentinel_folder_bnu.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true;
@@ -82,13 +82,13 @@ else
 fi
 
 if [[ -w ${CTLIST} ]]; then
-        rm -f ${CTLIST}
-        echo "Removed old corrupted file list!"
+        > ${CTLIST}
+        echo "Cleared old corrupted file list!"
 fi
 
 SKIP=0
 if [[ -f ${DATADIR}/${VERIFIED_RECORD} ]]; then
-    echo "Found a record of verified files. Will skip verifying the checksum of these files to save time"
+    echo "Found a record of validated files. Will skip validating the checksum of these files to save time"
     echo
     SKIP=1
 fi
@@ -102,32 +102,33 @@ do
     if [[ ${SKIP} -eq 1 ]]; then
         TMP=$(grep "${fname}" ${DATADIR}/${VERIFIED_RECORD})
         if [[ $? -eq 0 ]]; then
-            echo "Skip ${fname}, validated"
+            echo "Skip $((i+1)) / ${NUMFILES}: ${fname}, validated"
             continue
         else
         	TMP=$(grep "${line}" ${DATADIR}/${VERIFIED_RECORD})
         	if [[ $? -eq 0 ]]; then
-        		echo "Skip ${fname}, validated"
+        		echo "Skip $((i+1)) / ${NUMFILES}: ${fname}, validated"
             	continue	
         	fi
         fi
     fi
 
-    echo -n "Verifying $((i+1)) / ${NUMFILES}: ${fname}"
+    echo -n "Validating $((i+1)) / ${NUMFILES}: ${fname}"
     # get the checksum file
-    if [[ ${DLTYPE} == "zip" ]]; then
-        CKSUMFILE="$(dirname ${fname})/$(basename ${fname} .zip)"".md5"
-    else
-        CKSUMFILE="${fname}.md5"
-    fi
-
+    CKSUMFILE="${fname}.md5"
     if [[ ! -f ${CKSUMFILE} ]]; then
         echo
-        echo "Checksum file does not exist: ${CKSUMFILE}"
+        echo "Checksum file does not exist: ${fname}"
         continue
     fi
     
     O_CHECKSUM=$(cat ${CKSUMFILE})
+    if [[ -z ${O_CHECKSUM} ]]; then
+        echo
+        echo "${CKSUMFILE} is empty! Removed it!"
+        rm -rf ${CKSUMFILE}
+        continue
+    fi 
     
     C_CHECKSUM=$(md5sum ${TMP1[i]} | tr -s ' ' | cut -d ' ' -f 1)
     if [[ ${O_CHECKSUM^^} != ${C_CHECKSUM^^} ]]; then
@@ -140,7 +141,8 @@ do
             # is $value in a folder named with product ID.  also remove the
             # folder of product ID.
             if [[ ${DLTYPE} == "value" ]]; then
-            	rm -rf ${TMP1[i]%"/\$value"}
+            	rm -rf ${fname%"/\$value"}
+                echo "Remove the folder of the corrupted file: ${fname%"/\$value"}"
             fi
         fi
     else
@@ -150,4 +152,5 @@ do
 done
 
 echo "${NUMFILES} files validation done!"
+echo `cat ${CTLIST} | wc -l` "files found corrupted"
 echo "=================================="

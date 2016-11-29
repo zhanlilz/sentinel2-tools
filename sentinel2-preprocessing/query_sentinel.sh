@@ -1,0 +1,324 @@
+#!/bin/bash
+# read a query of Sentinel data search and output all the download links to a file for the input file to wget
+# Zhan Li, zhan.li@umb.edu
+# Created: Tue Mar  8 17:44:57 EST 2016
+
+# -------------------------------------
+### user inputs, change as you need ###
+# We use opensearch string to query data from Sentinel Data Hub. More information at https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/5APIsAndBatchScripting#Open_Search
+# REQUEST_STR can be directly copied from the section "Request Done:" on the page https://scihub.copernicus.eu/dhus/ after you interactively search the data of your interest.
+# The REQUEST_STR has to be in single quotes to avoid further escaping shell's special characters.
+# 
+# ** Examples of REQUEST_STR **
+# 
+# * Sentinel-1, polygon, from given beginning time to given ending time
+# REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+# 
+# * Sentinel-1, point, all available images from given beginning time until now
+# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+# 
+# * Sentinel-2, polygon, from given beginning time to given ending time
+# REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-2)'
+# 
+# * Sentinel-2, point, all available images from given beginning time until now
+# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
+# 
+
+# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
+# # the prefix of output list of found files, including the file path
+# OUTPREFIX="../meta-files/s1_2016_feb" # in the Disk D, directory "sentinel" -> "test-meta", output file will start with prefix "test"
+# USER="zhan.li" # your user name on Sentinel Data Hub
+# PSW="1986721615" # your password on Sentinel Data Hub
+# DISKSPACE=$(echo "3.5*1024*1024*1024*1024" | bc) # 3.5T actual space on a 4T disk, the disk space you have to hold the downloaded data before uncompressing them, in unit of bytes.
+
+### end of user inputs ###
+# -------------------------------------
+
+read -d '' USAGE <<EOF
+
+query_sentinel.sh [options] REQUEST_STR
+
+Query Sentinel data from ESA Sentinel Data Hub through OpenSearch,
+given *REQUEST_STR*, the string of query conditions.
+
+Options
+
+  -u, --user
+    Username of ESA Science Data Hub account
+
+  -p, --password
+    Password of ESA Science Data Hub account
+
+  -o, --outprefix
+    Prefix of output file of list of found images
+
+  -d, --disk
+    Disk space (unit, byte) to hold part of the image data, used to split the list
+    of images into several files of image lists, each of which list
+    contains images of size no larger than the given disk space.
+
+  -q, --quiet
+    Disable confirmation of inputs by the user and run query quietly.
+EOF
+
+DISKSPACE=-1
+QUIET=0
+OPTS=`getopt -o u:p:o:d:q --long user:,password:,outprefix:,quiet,disk: -n 'query_sentinel.sh' -- "$@"`
+if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; echo "${USAGE}" ; exit 1 ; fi
+substr_exist ()
+{
+    # substr_exist substr str
+    # local substr=$(echo ${1} | sed 's/-/\\-/g')
+    echo "${2}" | grep -q "${1}"
+    if [[ $? -eq 0 ]]; then
+        echo 1
+        return 1
+    else
+        echo 0
+        return 0
+    fi
+}
+
+if [[ $(substr_exist "\-\-user" "${OPTS}") -eq 0 && $(substr_exist "\-\u" "${OPTS}") -eq 0 ]]; then echo "No -u or --user" ; echo "${USAGE}" ; exit 1 ; fi
+if [[ $(substr_exist "\-\-password" "${OPTS}") -eq 0 && $(substr_exist "\-\p" "${OPTS}") -eq 0 ]]; then echo "No --password" ; echo "${USAGE}" ; exit 1 ; fi
+if [[ $(substr_exist "\-\-outprefix" "${OPTS}") -eq 0 && $(substr_exist "\-\o" "${OPTS}") -eq 0  ]]; then echo "No --outprefix" ; echo "${USAGE}" ; exit 1 ; fi
+
+eval set -- "${OPTS}"
+while true;
+do
+    case "${1}" in
+        -u | --user )
+            case "${2}" in
+                "") shift 2 ;;
+                *) USER=${2} ; shift 2 ;;
+            esac ;;
+        -p | --password )
+            case "${2}" in
+                "") shift 2 ;;
+                *) PSW=${2} ; shift 2 ;;
+            esac ;;
+        -o | --outprefix )
+            case "${2}" in
+                "") shift 2 ;;
+                *) OUTPREFIX=${2} ; shift 2 ;;
+            esac ;;
+        -d | --disk )
+            case "${2}" in
+                "") shift 2 ;;
+                *) DISKSPACE=${2} ; shift 2 ;;
+            esac ;;
+        -q | --quiet )
+            QUIET=1 ; shift ;;
+        -- ) shift ; break ;;
+        * ) break ;;
+    esac
+done
+MINPARAMS=1
+if [[ ${#} < ${MINPARAMS} ]]; then
+    echo "${USAGE}"
+    exit 1
+fi
+REQUEST_STR=${1}
+
+QUERY_PREFIX='https://scihub.copernicus.eu/dhus/search?q='
+QUERY_SUFFIX=''
+QUERY_REC_LIMIT=100
+
+# additional files to write for query
+QUERY_RESULT="${OUTPREFIX}.query.raw"
+LOG_FILE="${OUTPREFIX}.query.log"
+
+cat << EOF
+Query string to send to Sentinel data hub:
+  ${REQUEST_STR}
+
+Prefix of output file of list of found data: 
+  ${OUTPREFIX}
+
+User name: 
+  ${USER}
+
+Password: 
+  ${PSW}
+
+Free diskspace: 
+  ${DISKSPACE} bytes
+
+---------------------------------------------
+
+Additional output files from the query will be in the same folder as your ${OUTPREFIX}
+1. log file of wget query: ${LOG_FILE} 
+2. raw outputs from the query: ${QUERY_RESULT}
+
+EOF
+
+if [[ ${QUIET} -eq 0 ]]; then
+    # ask user to confirm the query
+    echo "All correct to go? (Y/n)"
+
+    read YN
+    if [[ "${YN}" == "Y" ]]; then
+        # ready to go
+        echo "Start querying ..."
+    else
+        exit 1
+    fi
+fi
+
+# calculate disk space
+DISKSPACE=$(echo ${DISKSPACE} | bc)
+
+# set up output folder if it does not exist yet
+OUTDIR=$(echo ${OUTPREFIX} | rev | cut -d '/' -f2- | rev)
+if [[ ! -d ${OUTDIR} ]]; then
+	mkdir -p ${OUTDIR}
+fi
+
+GOT_ALL=0
+START_REC=0
+QUERY_CNT=0
+QUERY_MAX=10000
+# Query from the server
+> ${QUERY_RESULT}
+while [[ ${GOT_ALL} -eq 0 ]]; do
+	QUERY_CNT=$((QUERY_CNT+1))
+	QUERY_STR="${QUERY_PREFIX}${REQUEST_STR}${QUERY_SUFFIX}&rows=${QUERY_REC_LIMIT}&start=${START_REC}"
+	echo -n "Start querying records at ${START_REC} ... "
+	wget --no-check-certificate --user=${USER} --password=${PSW} --output-file="${LOG_FILE}" -O "${QUERY_RESULT}.tmp" "${QUERY_STR}"
+	WGET_EXIT=$?
+	if [[ ${WGET_EXIT} -ne 0 ]]; then
+		if [[ ${QUERY_CNT} -lt ${QUERY_MAX} ]]; then
+			TMP=$((60*(QUERY_CNT)))
+			echo
+			echo "wget error, server may be temporarily down. Restart querying from record ${START_REC} after waiting ${TMP} seconds"
+			sleep ${TMP}
+			continue
+		else
+			echo
+			echo "wget error and retry times has reached ${QUERY_MAX}. Check the server and try it later"
+			rm -f "${QUERY_RESULT}.tmp"
+			exit 2	
+		fi
+	fi
+	if [[ ${QUERY_CNT} -eq 1 ]]; then
+		NREC_TOT=$(grep "<opensearch:totalResults>" "${QUERY_RESULT}.tmp" | cut -f 2 -d'>' | cut -f 1 -d'<')
+	fi
+
+	cat "${QUERY_RESULT}.tmp" >> "${QUERY_RESULT}"
+	echo "done"
+	START_REC=$((${START_REC}+${QUERY_REC_LIMIT}))
+	if [[ ${START_REC} -ge ${NREC_TOT} ]]; then
+		GOT_ALL=1
+	fi
+	# wait for a bit randomly to avoid server from blocking us
+	sleep $((RANDOM%30))
+done
+rm -f "${QUERY_RESULT}.tmp"
+
+echo "Parsing query results ..."
+# find the start line of the found entries
+TMP=$(grep -m 1 -n '<entry>' ${QUERY_RESULT} | cut -d':' -f1 | head -n 1)
+tail -n +"${TMP}" ${QUERY_RESULT} > "${OUTPREFIX}.tmp"
+# echo ${ENTRIES}
+# output the download link to a list
+cat "${OUTPREFIX}.tmp" | grep '<link href=' | cut -f2 -d'"' > "${OUTPREFIX}.tmp1"
+cat "${OUTPREFIX}.tmp" | grep '<title' | grep -v '<title>Sentinels' | cut -f2 -d'>' | cut -d'<' -f1 > "${OUTPREFIX}.tmp2"
+paste -d ' ' "${OUTPREFIX}.tmp1" "${OUTPREFIX}.tmp2" > ${OUTPREFIX}
+rm -rf "${OUTPREFIX}.tmp" "${OUTPREFIX}.tmp1" "${OUTPREFIX}.tmp2"
+# get number of file
+N=`cat $OUTPREFIX | wc -l`
+echo $N files found
+
+if [[ ${DISKSPACE} -eq -1 ]]; then
+    echo "No disk space specified; All found in a single list file"
+    exit
+fi
+
+BYTE2GB=$((1024*1024*1024))
+
+ACCSIZE=0
+LISTIND=1
+FIND=0
+# if [[ -w ${OUTPREFIX}_${LISTIND}.txt ]]; then
+#     rm -f ${OUTPREFIX}_${LISTIND}.txt
+# fi
+while true; do
+# PS4='+ $(date "+%s.%N")\011 '
+# exec 3>&2 2> ./profiling.$$.log
+# set -x
+    read -r data_url <&4 || break
+    FIND=$((FIND+1))
+    echo -ne "Sorting # ${FIND} / ${N} file ... "
+    if [[ -r ${OUTPREFIX}_${LISTIND}.txt ]]; then
+    	TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
+    	TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
+    	if [[ ! -z ${TMPSTR} ]]; then
+    		CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
+    		ACCSIZE=$((ACCSIZE+CONTLEN))
+    		echo "sorted, skip"
+    		continue
+    	fi
+    fi
+    # the following way to get ContentLength is slow and the bottleneck... Haven't found a better way to do this in pure shell script
+    qurl=$(echo ${data_url} | cut -f1 -d ' ')
+    qurl=${qurl%\/\$value}
+    
+    for ((i=0; i<${QUERY_MAX}; i++)); do
+    	wget --no-check-certificate --user ${USER} --password ${PSW} -q -O "${OUTPREFIX}.tmp" "${qurl}"
+    	WGET_EXIT=$?
+    	if [[ ${WGET_EXIT} -ne 0 ]]; then
+    		TMP=$((60*(i+1)))
+    		echo "wget error when querying meta info, retry after waiting ${TMP} seconds"
+    		sleep ${TMP}
+    		echo -ne "Sorting # ${FIND} / ${N} file ... "
+    	else
+    		break
+    	fi
+    done
+    if [[ ${WGET_EXIT} -ne 0 ]]; then
+    	echo
+		echo "wget error when querying meta info for sorting ${FIND} file. "
+		echo "Retry times has reached ${QUERY_MAX}. Check the server and try it later"
+		rm -f "${OUTPREFIX}.tmp"
+		exit 3
+    fi
+
+    CONTLEN=$(cat "${OUTPREFIX}.tmp" | tr 'd:' '\n' | grep 'ContentLength' | cut -d '>' -f 2 | cut -d '<' -f 1)
+    ACCSIZE=$((ACCSIZE+CONTLEN))
+    if [[ $(echo "${ACCSIZE} < ${DISKSPACE}" | bc) -eq 1 ]]; then
+        echo ${data_url}" "${CONTLEN} >> ${OUTPREFIX}_${LISTIND}.txt
+        echo "done"
+    else
+		TOTSIZE=$(((${ACCSIZE}+${BYTE2GB})/${BYTE2GB}))
+        LISTIND=$((LISTIND+1))
+        ACCSIZE=0
+        # if [[ -w ${OUTPREFIX}_${LISTIND}.txt ]]; then
+        #         rm -f ${OUTPREFIX}_${LISTIND}.txt
+        # fi
+	    if [[ -r ${OUTPREFIX}_${LISTIND}.txt ]]; then
+	    	TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
+	    	TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
+	    	if [[ ! -z ${TMPSTR} ]]; then
+	    		CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
+	    		ACCSIZE=$((ACCSIZE+CONTLEN))
+	    		echo "sorted, skip"
+	    		echo "Total size of data files in the #$((LISTIND-1)) list = ${TOTSIZE} GB"
+	    		continue
+	    	fi
+	    fi
+        echo ${data_url}" "${CONTLEN} >> ${OUTPREFIX}_${LISTIND}.txt
+        echo "done"
+        echo "Total size of data files in the #$((LISTIND-1)) list = ${TOTSIZE} GB"
+    fi
+    sleep $((RANDOM%5))
+    # if [[ "${FIND}" -gt 20 ]]; then
+    #       break
+    # fi 
+# set +x
+# exec 2>&3 3>&-
+done 4<$OUTPREFIX
+rm -f "${OUTPREFIX}.tmp"
+
+echo "Total size of data to be downloaded in the #${LISTIND} list = $(((${ACCSIZE}+${BYTE2GB})/${BYTE2GB})) GB"
+
+rm -f $OUTPREFIX
