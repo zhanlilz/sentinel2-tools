@@ -117,9 +117,12 @@ do
     # get the checksum file
     CKSUMFILE="${fname}.md5"
     if [[ ! -f ${CKSUMFILE} ]]; then
-        echo
-        echo "Checksum file does not exist: ${fname}"
-        continue
+        CKSUMFILE=${fname%".zip"}".md5"
+        if [[ ! -f ${CKSUMFILE} ]]; then
+            echo
+            echo "Checksum file does not exist: ${fname}"
+            continue
+        fi
     fi
     
     O_CHECKSUM=$(cat ${CKSUMFILE})
