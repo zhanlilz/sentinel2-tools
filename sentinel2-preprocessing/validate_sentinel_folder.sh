@@ -84,6 +84,8 @@ fi
 if [[ -w ${CTLIST} ]]; then
         > ${CTLIST}
         echo "Cleared old corrupted file list!"
+else
+    > ${CTLIST}
 fi
 
 SKIP=0
