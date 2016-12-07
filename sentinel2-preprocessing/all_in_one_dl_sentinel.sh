@@ -39,14 +39,14 @@ OPTS=`getopt -o rv --long user:,password:,recursive,verbose -n 'all_in_one_dl_se
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; echo "${USAGE}" ; exit 1 ; fi
 substr_exist ()
 {
-	# substr_exist substr str
-	# local substr=$(echo ${1} | sed 's/-/\\-/g')
-	echo "${2}" | grep -q "${1}"
-	if [[ $? -eq 0 ]]; then
-		return 1
-	else
-		return 0
-	fi
+    # substr_exist substr str
+    # local substr=$(echo ${1} | sed 's/-/\\-/g')
+    echo "${2}" | grep -q "${1}"
+    if [[ $? -eq 0 ]]; then
+        return 1
+    else
+        return 0
+    fi
 }
 substr_exist "\-\-user" "${OPTS}"
 if [[ $? -eq 0 ]]; then echo "No --user" ; echo "${USAGE}" ; exit 1 ; fi
@@ -57,22 +57,22 @@ eval set -- "${OPTS}"
 while true;
 do
     case "${1}" in 
-	--user )
-	    case "${2}" in
-		"") shift 2 ;;
-		*) USER=${2} ; shift 2 ;;
-	    esac ;;
-	--password )
-	    case "${2}" in
-		"") shift 2 ;;
-		*) PSW=${2} ; shift 2 ;;
-	    esac ;;
-	-v | --verbose )
-	    VERBOSE=1 ; shift ;;
-	-r | --recursive )
-	    RECURSIVE=1 ; shift ;;
-	-- ) shift ; break ;;
-	* ) break ;;
+        --user )
+            case "${2}" in
+                "") shift 2 ;;
+                *) USER=${2} ; shift 2 ;;
+            esac ;;
+        --password )
+            case "${2}" in
+                "") shift 2 ;;
+                *) PSW=${2} ; shift 2 ;;
+            esac ;;
+        -v | --verbose )
+            VERBOSE=1 ; shift ;;
+        -r | --recursive )
+            RECURSIVE=1 ; shift ;;
+        -- ) shift ; break ;;
+        * ) break ;;
     esac
 done
 MINPARAMS=2
@@ -111,9 +111,9 @@ IGNORELOG=${OUTDIR}/"checksum_verified"
 while [[ ${MS_NUM} -gt 0 ]];
 do
     if [[ ${RUN_NUM} -ge ${MAXNUMRUN} ]]; then
-		echo "Reached the maximum number of running tries, ${MAXNUMRUN}."
-		echo "Still have ${MS_NUM} files unsuccessfully downloaded. They are listed in the file ${MS_FILE}.${RUN_NUM}."
-		exit 2
+        echo "Reached the maximum number of running tries, ${MAXNUMRUN}."
+        echo "Still have ${MS_NUM} files unsuccessfully downloaded. They are listed in the file ${MS_FILE}.${RUN_NUM}."
+        exit 2
     fi
 
     RUN_NUM=$((RUN_NUM+1))    
@@ -144,11 +144,16 @@ do
     ${VAL_CMD} -c "${OUTDIR}" "${COR_FILE}.${RUN_NUM}"
 
     # find missing data files and checksum files
-    ${MS_CMD} "${OUTDIR}" "${IN_URL_FILE}" "${MS_FILE}.${RUN_NUM}"
+    if [[ ${RECURSIVE} -eq 1 ]]; then
+        ${MS_CMD} --pattern="\$value" "${OUTDIR}" "${IN_URL_FILE}" "${MS_FILE}.${RUN_NUM}"
+    else
+        ${MS_CMD} --pattern="*.zip" "${OUTDIR}" "${IN_URL_FILE}" "${MS_FILE}.${RUN_NUM}"
+    fi
+    
     MS_NUM=$(cat "${MS_FILE}.${RUN_NUM}" | wc -l)
 
-	echo "Finish running round #${RUN_NUM}"
-	echo "********************************"
-	echo
+    echo "Finish running round #${RUN_NUM}"
+    echo "********************************"
+    echo
 done
 echo "Finish downloading all!"

@@ -130,7 +130,7 @@ fi
 for (( i=0; i<${#L1CS[@]}; ++i ));
 do
     echo "L2A <---- L1C: $(basename ${L1CS[i]})"
-#    L2A_Process --resolution ${RES} ${L1CS[i]}
+    #    L2A_Process --resolution ${RES} ${L1CS[i]}
     if [[ ! -z ${OUTDIR} ]]; then
         TMP=${L1CS[i]}
         TMP=${TMP/"OPER"/"USER"}

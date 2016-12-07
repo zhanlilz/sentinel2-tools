@@ -171,7 +171,7 @@ DISKSPACE=$(echo ${DISKSPACE} | bc)
 # set up output folder if it does not exist yet
 OUTDIR=$(echo ${OUTPREFIX} | rev | cut -d '/' -f2- | rev)
 if [[ ! -d ${OUTDIR} ]]; then
-	mkdir -p ${OUTDIR}
+    mkdir -p ${OUTDIR}
 fi
 
 GOT_ALL=0
@@ -181,37 +181,37 @@ QUERY_MAX=10000
 # Query from the server
 > ${QUERY_RESULT}
 while [[ ${GOT_ALL} -eq 0 ]]; do
-	QUERY_CNT=$((QUERY_CNT+1))
-	QUERY_STR="${QUERY_PREFIX}${REQUEST_STR}${QUERY_SUFFIX}&rows=${QUERY_REC_LIMIT}&start=${START_REC}"
-	echo -n "Start querying records at ${START_REC} ... "
-	wget --no-check-certificate --user=${USER} --password=${PSW} --output-file="${LOG_FILE}" -O "${QUERY_RESULT}.tmp" "${QUERY_STR}"
-	WGET_EXIT=$?
-	if [[ ${WGET_EXIT} -ne 0 ]]; then
-		if [[ ${QUERY_CNT} -lt ${QUERY_MAX} ]]; then
-			TMP=$((60*(QUERY_CNT)))
-			echo
-			echo "wget error, server may be temporarily down. Restart querying from record ${START_REC} after waiting ${TMP} seconds"
-			sleep ${TMP}
-			continue
-		else
-			echo
-			echo "wget error and retry times has reached ${QUERY_MAX}. Check the server and try it later"
-			rm -f "${QUERY_RESULT}.tmp"
-			exit 2	
-		fi
-	fi
-	if [[ ${QUERY_CNT} -eq 1 ]]; then
-		NREC_TOT=$(grep "<opensearch:totalResults>" "${QUERY_RESULT}.tmp" | cut -f 2 -d'>' | cut -f 1 -d'<')
-	fi
+    QUERY_CNT=$((QUERY_CNT+1))
+    QUERY_STR="${QUERY_PREFIX}${REQUEST_STR}${QUERY_SUFFIX}&rows=${QUERY_REC_LIMIT}&start=${START_REC}"
+    echo -n "Start querying records at ${START_REC} ... "
+    wget --no-check-certificate --user=${USER} --password=${PSW} --output-file="${LOG_FILE}" -O "${QUERY_RESULT}.tmp" "${QUERY_STR}"
+    WGET_EXIT=$?
+    if [[ ${WGET_EXIT} -ne 0 ]]; then
+        if [[ ${QUERY_CNT} -lt ${QUERY_MAX} ]]; then
+            TMP=$((60*(QUERY_CNT)))
+            echo
+            echo "wget error, server may be temporarily down. Restart querying from record ${START_REC} after waiting ${TMP} seconds"
+            sleep ${TMP}
+            continue
+        else
+            echo
+            echo "wget error and retry times has reached ${QUERY_MAX}. Check the server and try it later"
+            rm -f "${QUERY_RESULT}.tmp"
+            exit 2  
+        fi
+    fi
+    if [[ ${QUERY_CNT} -eq 1 ]]; then
+        NREC_TOT=$(grep "<opensearch:totalResults>" "${QUERY_RESULT}.tmp" | cut -f 2 -d'>' | cut -f 1 -d'<')
+    fi
 
-	cat "${QUERY_RESULT}.tmp" >> "${QUERY_RESULT}"
-	echo "done"
-	START_REC=$((${START_REC}+${QUERY_REC_LIMIT}))
-	if [[ ${START_REC} -ge ${NREC_TOT} ]]; then
-		GOT_ALL=1
-	fi
-	# wait for a bit randomly to avoid server from blocking us
-	sleep $((RANDOM%30))
+    cat "${QUERY_RESULT}.tmp" >> "${QUERY_RESULT}"
+    echo "done"
+    START_REC=$((${START_REC}+${QUERY_REC_LIMIT}))
+    if [[ ${START_REC} -ge ${NREC_TOT} ]]; then
+        GOT_ALL=1
+    fi
+    # wait for a bit randomly to avoid server from blocking us
+    sleep $((RANDOM%30))
 done
 rm -f "${QUERY_RESULT}.tmp"
 
@@ -243,44 +243,44 @@ FIND=0
 #     rm -f ${OUTPREFIX}_${LISTIND}.txt
 # fi
 while true; do
-# PS4='+ $(date "+%s.%N")\011 '
-# exec 3>&2 2> ./profiling.$$.log
-# set -x
+    # PS4='+ $(date "+%s.%N")\011 '
+    # exec 3>&2 2> ./profiling.$$.log
+    # set -x
     read -r data_url <&4 || break
     FIND=$((FIND+1))
     echo -ne "Sorting # ${FIND} / ${N} file ... "
     if [[ -r ${OUTPREFIX}_${LISTIND}.txt ]]; then
-    	TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
-    	TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
-    	if [[ ! -z ${TMPSTR} ]]; then
-    		CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
-    		ACCSIZE=$((ACCSIZE+CONTLEN))
-    		echo "sorted, skip"
-    		continue
-    	fi
+        TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
+        TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
+        if [[ ! -z ${TMPSTR} ]]; then
+            CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
+            ACCSIZE=$((ACCSIZE+CONTLEN))
+            echo "sorted, skip"
+            continue
+        fi
     fi
     # the following way to get ContentLength is slow and the bottleneck... Haven't found a better way to do this in pure shell script
     qurl=$(echo ${data_url} | cut -f1 -d ' ')
     qurl=${qurl%\/\$value}
     
     for ((i=0; i<${QUERY_MAX}; i++)); do
-    	wget --no-check-certificate --user ${USER} --password ${PSW} -q -O "${OUTPREFIX}.tmp" "${qurl}"
-    	WGET_EXIT=$?
-    	if [[ ${WGET_EXIT} -ne 0 ]]; then
-    		TMP=$((60*(i+1)))
-    		echo "wget error when querying meta info, retry after waiting ${TMP} seconds"
-    		sleep ${TMP}
-    		echo -ne "Sorting # ${FIND} / ${N} file ... "
-    	else
-    		break
-    	fi
+        wget --no-check-certificate --user ${USER} --password ${PSW} -q -O "${OUTPREFIX}.tmp" "${qurl}"
+        WGET_EXIT=$?
+        if [[ ${WGET_EXIT} -ne 0 ]]; then
+            TMP=$((60*(i+1)))
+            echo "wget error when querying meta info, retry after waiting ${TMP} seconds"
+            sleep ${TMP}
+            echo -ne "Sorting # ${FIND} / ${N} file ... "
+        else
+            break
+        fi
     done
     if [[ ${WGET_EXIT} -ne 0 ]]; then
-    	echo
-		echo "wget error when querying meta info for sorting ${FIND} file. "
-		echo "Retry times has reached ${QUERY_MAX}. Check the server and try it later"
-		rm -f "${OUTPREFIX}.tmp"
-		exit 3
+        echo
+        echo "wget error when querying meta info for sorting ${FIND} file. "
+        echo "Retry times has reached ${QUERY_MAX}. Check the server and try it later"
+        rm -f "${OUTPREFIX}.tmp"
+        exit 3
     fi
 
     CONTLEN=$(cat "${OUTPREFIX}.tmp" | tr 'd:' '\n' | grep 'ContentLength' | cut -d '>' -f 2 | cut -d '<' -f 1)
@@ -289,23 +289,23 @@ while true; do
         echo ${data_url}" "${CONTLEN} >> ${OUTPREFIX}_${LISTIND}.txt
         echo "done"
     else
-		TOTSIZE=$(((${ACCSIZE}+${BYTE2GB})/${BYTE2GB}))
+        TOTSIZE=$(((${ACCSIZE}+${BYTE2GB})/${BYTE2GB}))
         LISTIND=$((LISTIND+1))
         ACCSIZE=0
         # if [[ -w ${OUTPREFIX}_${LISTIND}.txt ]]; then
         #         rm -f ${OUTPREFIX}_${LISTIND}.txt
         # fi
-	    if [[ -r ${OUTPREFIX}_${LISTIND}.txt ]]; then
-	    	TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
-	    	TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
-	    	if [[ ! -z ${TMPSTR} ]]; then
-	    		CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
-	    		ACCSIZE=$((ACCSIZE+CONTLEN))
-	    		echo "sorted, skip"
-	    		echo "Total size of data files in the #$((LISTIND-1)) list = ${TOTSIZE} GB"
-	    		continue
-	    	fi
-	    fi
+        if [[ -r ${OUTPREFIX}_${LISTIND}.txt ]]; then
+            TMPSTR=$(echo "${data_url}" | cut -f2 -d ' ')
+            TMPSTR=$(grep ${TMPSTR} ${OUTPREFIX}_${LISTIND}.txt)
+            if [[ ! -z ${TMPSTR} ]]; then
+                CONTLEN=$(echo ${TMPSTR} | cut -f3 -d ' ')
+                ACCSIZE=$((ACCSIZE+CONTLEN))
+                echo "sorted, skip"
+                echo "Total size of data files in the #$((LISTIND-1)) list = ${TOTSIZE} GB"
+                continue
+            fi
+        fi
         echo ${data_url}" "${CONTLEN} >> ${OUTPREFIX}_${LISTIND}.txt
         echo "done"
         echo "Total size of data files in the #$((LISTIND-1)) list = ${TOTSIZE} GB"
@@ -314,8 +314,8 @@ while true; do
     # if [[ "${FIND}" -gt 20 ]]; then
     #       break
     # fi 
-# set +x
-# exec 2>&3 3>&-
+    # set +x
+    # exec 2>&3 3>&-
 done 4<$OUTPREFIX
 rm -f "${OUTPREFIX}.tmp"
 

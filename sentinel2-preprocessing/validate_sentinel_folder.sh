@@ -29,7 +29,7 @@ while true;
 do
     case "${1}" in
         -c | --clean ) 
-			CLEAN=1 ; shift ;;
+            CLEAN=1 ; shift ;;
         -p | --pattern )
             case "${2}" in
                 "") shift 2 ;;
@@ -42,8 +42,8 @@ done
 # parse input arguments
 MINPARAMS=2
 if [[ $# -lt "$MINPARAMS" ]]; then
-  echo "${USAGE}"
-  exit 1
+    echo "${USAGE}"
+    exit 1
 fi
 
 if [[ -n "${1}" ]]; then
@@ -82,8 +82,8 @@ else
 fi
 
 if [[ -w ${CTLIST} ]]; then
-        > ${CTLIST}
-        echo "Cleared old corrupted file list!"
+    > ${CTLIST}
+    echo "Cleared old corrupted file list!"
 else
     > ${CTLIST}
 fi
@@ -107,11 +107,11 @@ do
             echo "Skip $((i+1)) / ${NUMFILES}: ${fname}, validated"
             continue
         else
-        	TMP=$(grep "${line}" ${DATADIR}/${VERIFIED_RECORD})
-        	if [[ $? -eq 0 ]]; then
-        		echo "Skip $((i+1)) / ${NUMFILES}: ${fname}, validated"
-            	continue	
-        	fi
+            TMP=$(grep "${line}" ${DATADIR}/${VERIFIED_RECORD})
+            if [[ $? -eq 0 ]]; then
+                echo "Skip $((i+1)) / ${NUMFILES}: ${fname}, validated"
+                continue        
+            fi
         fi
     fi
 
@@ -146,7 +146,7 @@ do
             # is $value in a folder named with product ID.  also remove the
             # folder of product ID.
             if [[ ${DLTYPE} == "value" ]]; then
-            	rm -rf ${fname%"/\$value"}
+                rm -rf ${fname%"/\$value"}
                 echo "Remove the folder of the corrupted file: ${fname%"/\$value"}"
             fi
         fi
