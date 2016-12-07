@@ -164,6 +164,16 @@ do
         if [[ -z ${tmp} ]]; then
             echo "No return from query the meta data of this download URL: ${qurl}"
             ALLDONE=1
+
+            # Check the reason of no return, is it because the server is down again?
+            wget -a ${LOG} -O /dev/null --wait=15 -t ${TRIES} --waitretry=${WAITRETRY} --random-wait --no-check-certificate --user=${USER} --password=${PSW} ${qurl}
+            WGET_EXIT=$?
+            if [[ ${WGET_EXIT} -ge 8 ]]; then
+                SERVER_ERR_CNT=$((SERVER_ERR_CNT+1))
+                echo "Server issued error, waiting $((SERVER_ERR_CNT*60)) seconds for server to recover ..."
+                sleep $((SERVER_ERR_CNT*60))                
+            fi
+            
             continue
         fi
 
