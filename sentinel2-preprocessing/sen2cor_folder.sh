@@ -33,7 +33,7 @@ Options
 
 EOF
 
-OPTS=`getopt -o r:o::g:: --long resolution:,output-directory::,granule:: -n 'sen2cor_folder.sh' -- "$@"`
+OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule: -n 'sen2cor_folder.sh' -- "$@"`
 if [[ ! $? -eq 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true; 
@@ -58,6 +58,12 @@ do
         * ) break ;;
     esac
 done
+if [[ -z ${RES} ]]; then
+    echo "Option --resolution is required!"
+    echo "${USAGE}"
+    exit 1
+fi
+
 MINPARAMS=1
 if [[ ${#} < ${MINPARAMS} ]]; then
     echo "Missing positional arguments"
