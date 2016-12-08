@@ -31,9 +31,14 @@ Options
    name of non-selected granules; e.g., -g"15SYT,15SYU", or,
    --granule="18TTL"
 
+  --clean-l1c, optional, if this option set, the program will remove
+    L1C SAFE folder after successfully finishing sen2cor and
+    generating L2A SAFE folder.
+
 EOF
 
-OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule: -n 'sen2cor_folder.sh' -- "$@"`
+CLEAN_L1C=0
+OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule:,clean-l1c -n 'sen2cor_folder.sh' -- "$@"`
 if [[ ! $? -eq 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true; 
@@ -54,6 +59,8 @@ do
                 "") shift 2 ;;
                 *) GRANULES=${2} ; shift 2 ;;
             esac ;;
+        --clean-l1c )
+            CLEAN_L1C=1 ; shift ;;
         -- ) shift ; break ;;
         * ) break ;;
     esac
@@ -136,11 +143,17 @@ fi
 for (( i=0; i<${#L1CS[@]}; ++i ));
 do
     echo "L2A <---- L1C: $(basename ${L1CS[i]})"
-    #    L2A_Process --resolution ${RES} ${L1CS[i]}
+    L2A_Process --resolution ${RES} ${L1CS[i]}
+    SEN2COR_EXIT=$?
     if [[ ! -z ${OUTDIR} ]]; then
         TMP=${L1CS[i]}
         TMP=${TMP/"OPER"/"USER"}
         TMP=${TMP/"L1C"/"L2A"}
         mv ${TMP} ${OUTDIR}
     fi
+    if [[ ${SEN2COR_EXIT} -eq 0 && ${CLEAN_L1C} -eq 1 ]]; then
+        echo "Clean L1C input ${L1CS[i]}"
+        rm -rf ${L1CS[i]}
+    fi
+    echo
 done
