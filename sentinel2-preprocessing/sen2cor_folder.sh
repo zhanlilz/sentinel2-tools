@@ -140,9 +140,10 @@ if [[ ! -z ${OUTDIR} ]]; then
     fi
 fi
 
-for (( i=0; i<${#L1CS[@]}; ++i ));
+NUMFILES=${#L1CS[@]}
+for (( i=0; i<${NUMFILES}; ++i ));
 do
-    echo "L2A <---- L1C: $(basename ${L1CS[i]})"
+    echo "L2A <---- L1C $((i+1)) / ${NUMFILES}: $(basename ${L1CS[i]})"
     L2A_Process --resolution ${RES} ${L1CS[i]}
     SEN2COR_EXIT=$?
     if [[ ! -z ${OUTDIR} ]]; then
