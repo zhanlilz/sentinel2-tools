@@ -79,6 +79,13 @@ if [[ ${#} < ${MINPARAMS} ]]; then
 fi
 L1C_DIR=${1}
 
+# Some extra config here to make sure we have the GDAL_DATA env
+# variable set to the sen2cor version.
+if [[ ! -z ${SEN2COR_HOME} ]]; then
+    OLD_GDAL_DATA=${GDAL_DATA}
+    source ${SEN2COR_HOME}/L2A_Bashrc
+fi
+
 L1CS=($(find ${L1C_DIR} -maxdepth 1 -type d -name "S*L1C*.SAFE"))
 
 In_Array ()
@@ -158,3 +165,6 @@ do
     fi
     echo
 done
+
+# restore old GDAL_DATA after processing with sen2cor
+export GDAL_DATA=${OLD_GDAL_DATA}
