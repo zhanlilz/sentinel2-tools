@@ -4,8 +4,8 @@ TARGET = sub
 # Files
 OBJ = envi.o space.o main.o
 
-##########################################3
-ADD_CFLAGS= -O3 -DLYNX  -ffloat-store -std=c99 -pedantic 
+##########################################
+ADD_CFLAGS= -O3 -DLYNX  -ffloat-store -std=c99 -pedantic -DDEBUG -g
 
 INC = -I$(API_INC) -I$(PGSINC) -I$(HDFINC) -I$(HDFEOS_INC) -I$(GCTPINC) -I. 
 
