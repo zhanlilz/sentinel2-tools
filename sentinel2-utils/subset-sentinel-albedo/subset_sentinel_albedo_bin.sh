@@ -39,10 +39,13 @@ Options:
 EOF
 
 # some default setting
-exe="/home/zhan.li/Workspace/src-programs/sentinel-2-tools/sentinel-2-utils/subset-sentinel-albedo/sub"
-pattern="lndAlbedo*.bin"
+pattern="S2*albedo*.bin"
+# where is our sub command, by default in the same folder as this
+# shell script
+exe_dir=$(readlink -f ${0} | xargs dirname)
+exe="${exe_dir}/sub"
 
-OPTS=`getopt -o w:d:o:p:: --long lat:,lon:,window:,directory:,output:,pattern:: -n 'subset_sentinel_albedo_bin.sh' -- "$@"`
+OPTS=`getopt -o w:d:o:p: --long lat:,lon:,window:,directory:,output:,pattern: -n 'subset_sentinel_albedo_bin.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options"; exit 1; fi
 eval set -- "${OPTS}"
 while true; 
@@ -107,34 +110,35 @@ lnds=($(find $dir/ -name "${pattern}"))
 
 echo "Number of files found = ${#lnds[@]}"
 
-echo "Path_Row,Year,DOY,Lat,Lon,Sensor,Scene_ID,BSA_mean,BSA_sd,BSA_count,WSA_mean,WSA_sd,WSA_count,Blue_mean,Blue_sd,Blue_count" > ${out}
+echo "Path_Row,Year,DOY,Lat,Lon,Sensor,Scene_ID,BSA_mean,BSA_sd,BSA_count,WSA_mean,WSA_sd,WSA_count" > ${out}
 
 for envi in ${lnds[@]}; do
-        base=${envi#*lndAlbedo_}
-        echo $base
+    base=$(basename ${envi})
+    echo $base
 
-        # Get acquisition date from the SAFE folder name. Sentinel-2
-        # granule file name does NOT have acquisition date but only
-        # product creation date.
-        #
-        # Now get acquisition date temporarily from the SAFE folder
-        # name where the granule resides
-        safesub=$(echo ${envi} | grep -o 'S2A_USER_PRD_MSIL2A_.*\.SAFE' | grep -o 'V.*\.SAFE')
-        year=${safesub:1:4}
-        doy=$(date -d ${safesub:1:8} "+%j")
+    # Get acquisition date from the SAFE folder name. Sentinel-2
+    # granule file name does NOT have acquisition date but only
+    # product creation date.
+    #
+    # Now get acquisition date temporarily from the SAFE folder
+    # name where the granule resides
+    safesub=$(echo ${envi} | grep -o 'S2A_USER_PRD_MSIL2A_.*\.SAFE' | grep -o 'V.*\.SAFE')
+    year=${safesub:1:4}
+    doy=$(date -d ${safesub:1:8} "+%j")
 
-        # No path or row for Sentinel-2 data
-        path="000"
-        row="000"
-        sensor="MSI"
-        tile="PATH${path}_ROW${row}"
-        echo ${year} ${doy} ${sensor} ${tile}
+    # No path or row for Sentinel-2 data
+    path="000"
+    row="000"
+    sensor="MSI"
+    tile="PATH${path}_ROW${row}"
+    echo ${year} ${doy} ${sensor} ${tile}
 
-        tmpout=$($exe $envi $lat $lon $window $year $doy $tile $sensor $base)
-        if [ $? -ne 0 ]; then
-                echo "ERROR, subsetting ${base}"
-                continue
-        else
-            echo ${tmpout} >> ${out}
-        fi
+    echo $exe $envi $lat $lon $window $year $doy $tile $sensor $base
+    tmpout=$($exe $envi $lat $lon $window $year $doy $tile $sensor $base)
+    if [ $? -ne 0 ]; then
+        echo "ERROR, subsetting ${base}"
+        continue
+    else
+        echo ${tmpout} >> ${out}
+    fi
 done
