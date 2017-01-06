@@ -56,12 +56,14 @@ Options
     Password of ESA Science Data Hub account
 
   -o, --outprefix, required
-    Prefix of output file of list of found images
+    Prefix of output file of list of found images, CANNOT be a
+    directory
 
   -d, --disk, optional
-    Disk space (unit, byte) to hold part of the image data, used to split the list
-    of images into several files of image lists, each of which list
-    contains images of size no larger than the given disk space.
+    Disk space (unit, byte) to hold part of the image data, used to
+    split the list of images into several files of image lists, each
+    of which list contains images of size no larger than the given
+    disk space.
 
   -q, --quiet, optional
     Disable confirmation of inputs by the user and run query quietly.
@@ -144,6 +146,12 @@ REQUEST_STR=${1}
 QUERY_PREFIX='https://scihub.copernicus.eu/dhus/search?q='
 QUERY_SUFFIX=''
 QUERY_REC_LIMIT=100
+
+# check if the outprefix is a directory, which is NOT allowed!
+if [[ -d ${OUTPREFIX} ]]; then
+    echo "${OUTPREFIX} is a directory, NOT a valid prefix for output file of found record!"
+    exit 1
+fi
 
 # additional files to write for query
 QUERY_RESULT="${OUTPREFIX}.query.raw"
