@@ -119,7 +119,7 @@ fi
 
 if [[ -z ${DLLOG} ]]; then
     DLLOG="/dev/null"
-    echo "NO log of downloaded data files"
+    echo "NOT to log the record of successfully downloaded data files"
 fi
 if [[ ! -r ${DLLOG} ]]; then
     touch ${DLLOG}
