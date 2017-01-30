@@ -23,7 +23,6 @@
 # * Sentinel-2, point, all available images from given beginning time until now
 # REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
 # 
-
 # REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
 # # the prefix of output list of found files, including the file path
 # OUTPREFIX="../meta-files/s1_2016_feb" # in the Disk D, directory "sentinel" -> "test-meta", output file will start with prefix "test"
@@ -39,18 +38,28 @@ read -d '' USAGE <<EOF
 query_sentinel.sh [options] REQUEST_STR
 
 Query Sentinel data from ESA Sentinel Data Hub through OpenSearch,
-given *REQUEST_STR*, the string of query conditions.
+given *REQUEST_STR*, the string of query conditions. *REQUEST_STR* can
+be directly copied from the section "Request Done:" on the page
+https://scihub.copernicus.eu/dhus/ after you interactively search the
+data of your interest.
+
+#*********************************************************************
+#*IMPORTANT: put your *REQUEST_STR* in SINGLE QUOTE such that you do *
+#*NOT have to escape any special characters in the string query      *
+#*conditions, # * such as double quots, '$', '&' and etc..           *
+#*********************************************************************
 
 Options
 
-  -u, --user
+  -u, --user, required
     Username of ESA Science Data Hub account
 
-  -p, --password
+  -p, --password, required
     Password of ESA Science Data Hub account
 
-  -o, --outprefix
-    Prefix of output file of list of found images
+  -o, --outprefix, required
+    Prefix of output file of list of found images, CANNOT be a
+    directory
 
   -d, --disk
     Disk space (unit, byte) to hold part of the image data, used to
@@ -62,8 +71,23 @@ Options
     files will be listed in a single file of the given outprefix
     without being sorted or split.
 
-  -q, --quiet
+  -q, --quiet, optional
     Disable confirmation of inputs by the user and run query quietly.
+
+Examples of *REQUEST_STR*
+
+  * Sentinel-1, polygon, from given beginning time to given ending time
+REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+
+  * Sentinel-1, point, all available images from given beginning time until now
+REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+
+  * Sentinel-2, polygon, from given beginning time to given ending time
+REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-2)'
+
+  * Sentinel-2, point, all available images from given beginning time until now
+REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
+
 EOF
 
 DISKSPACE=-1
@@ -128,6 +152,12 @@ REQUEST_STR=${1}
 QUERY_PREFIX='https://scihub.copernicus.eu/dhus/search?q='
 QUERY_SUFFIX=''
 QUERY_REC_LIMIT=100
+
+# check if the outprefix is a directory, which is NOT allowed!
+if [[ -d ${OUTPREFIX} ]]; then
+    echo "${OUTPREFIX} is a directory, NOT a valid prefix for output file of found record!"
+    exit 1
+fi
 
 # additional files to write for query
 QUERY_RESULT="${OUTPREFIX}.query.raw"
