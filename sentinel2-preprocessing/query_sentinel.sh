@@ -46,7 +46,7 @@ data of your interest.
 #*********************************************************************
 #*IMPORTANT: put your *REQUEST_STR* in SINGLE QUOTE such that you do *
 #*NOT have to escape any special characters in the string query      *
-#*conditions, # * such as double quots, '$', '&' and etc..           *
+#*conditions, such as double quots, '$', '&' and etc..               *
 #*********************************************************************
 
 Options
