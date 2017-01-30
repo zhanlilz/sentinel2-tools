@@ -53,9 +53,14 @@ Options
     Prefix of output file of list of found images
 
   -d, --disk
-    Disk space (unit, byte) to hold part of the image data, used to split the list
-    of images into several files of image lists, each of which list
-    contains images of size no larger than the given disk space.
+    Disk space (unit, byte) to hold part of the image data, used to
+    split the list of images into several files of image lists, each
+    of which list contains images of size no larger than the given
+    disk space. A string of mathematic expression is acceptable to
+    represent the disk space, e.g. "4*1024*1024*1024" in unit of byte
+    equals to 4 GB. If no disk space is provided, all found image
+    files will be listed in a single file of the given outprefix
+    without being sorted or split.
 
   -q, --quiet
     Disable confirmation of inputs by the user and run query quietly.
@@ -128,6 +133,14 @@ QUERY_REC_LIMIT=100
 QUERY_RESULT="${OUTPREFIX}.query.raw"
 LOG_FILE="${OUTPREFIX}.query.log"
 
+# calculate disk space
+DISKSPACE=$(echo ${DISKSPACE} | bc)
+if [[ ${DISKSPACE} -eq -1 ]]; then
+    DISKSPACE_INFO="No space is given and all found images listed in one file."
+else
+    DISKSPACE_INFO="${DISKSPACE} bytes to hold each split of the found images."
+fi
+
 cat << EOF
 Query string to send to Sentinel data hub:
   ${REQUEST_STR}
@@ -142,7 +155,7 @@ Password:
   ${PSW}
 
 Free diskspace: 
-  ${DISKSPACE} bytes
+  ${DISKSPACE_INFO}
 
 ---------------------------------------------
 
@@ -164,9 +177,6 @@ if [[ ${QUIET} -eq 0 ]]; then
         exit 1
     fi
 fi
-
-# calculate disk space
-DISKSPACE=$(echo ${DISKSPACE} | bc)
 
 # set up output folder if it does not exist yet
 OUTDIR=$(echo ${OUTPREFIX} | rev | cut -d '/' -f2- | rev)
@@ -231,6 +241,7 @@ echo $N files found
 
 if [[ ${DISKSPACE} -eq -1 ]]; then
     echo "No disk space specified; All found in a single list file"
+    echo "    ${OUTPREFIX}"
     exit
 fi
 
