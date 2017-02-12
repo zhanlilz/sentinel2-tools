@@ -3,36 +3,6 @@
 # Zhan Li, zhan.li@umb.edu
 # Created: Tue Mar  8 17:44:57 EST 2016
 
-# -------------------------------------
-### user inputs, change as you need ###
-# We use opensearch string to query data from Sentinel Data Hub. More information at https://scihub.copernicus.eu/twiki/do/view/SciHubUserGuide/5APIsAndBatchScripting#Open_Search
-# REQUEST_STR can be directly copied from the section "Request Done:" on the page https://scihub.copernicus.eu/dhus/ after you interactively search the data of your interest.
-# The REQUEST_STR has to be in single quotes to avoid further escaping shell's special characters.
-# 
-# ** Examples of REQUEST_STR **
-# 
-# * Sentinel-1, polygon, from given beginning time to given ending time
-# REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
-# 
-# * Sentinel-1, point, all available images from given beginning time until now
-# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
-# 
-# * Sentinel-2, polygon, from given beginning time to given ending time
-# REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-2)'
-# 
-# * Sentinel-2, point, all available images from given beginning time until now
-# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
-# 
-# REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
-# # the prefix of output list of found files, including the file path
-# OUTPREFIX="../meta-files/s1_2016_feb" # in the Disk D, directory "sentinel" -> "test-meta", output file will start with prefix "test"
-# USER="zhan.li" # your user name on Sentinel Data Hub
-# PSW="1986721615" # your password on Sentinel Data Hub
-# DISKSPACE=$(echo "3.5*1024*1024*1024*1024" | bc) # 3.5T actual space on a 4T disk, the disk space you have to hold the downloaded data before uncompressing them, in unit of bytes.
-
-### end of user inputs ###
-# -------------------------------------
-
 read -d '' USAGE <<EOF
 
 query_sentinel.sh [options] REQUEST_STR
@@ -44,9 +14,9 @@ https://scihub.copernicus.eu/dhus/ after you interactively search the
 data of your interest.
 
 #*********************************************************************
-#*IMPORTANT: put your *REQUEST_STR* in SINGLE QUOTE such that you do *
-#*NOT have to escape any special characters in the string query      *
-#*conditions, such as double quots, '$', '&' and etc..               *
+#* IMPORTANT: put your *REQUEST_STR* in SINGLE QUOTE such that you   *
+#* do NOT have to escape any special characters in the string of     *
+#* query conditions, such as double quots, '$', '&' and etc..        *
 #*********************************************************************
 
 Options
