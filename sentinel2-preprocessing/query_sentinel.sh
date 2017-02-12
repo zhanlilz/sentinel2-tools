@@ -88,6 +88,9 @@ REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.97343
   * Sentinel-2, point, all available images from given beginning time until now
 REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
 
+  * Sentinel-2, cloud cover within a given range
+REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 30])'
+
 EOF
 
 DISKSPACE=-1
