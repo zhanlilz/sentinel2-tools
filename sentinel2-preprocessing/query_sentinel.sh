@@ -47,19 +47,24 @@ Options
 Examples of *REQUEST_STR*
 
   * Sentinel-1, polygon, from given beginning time to given ending time
-REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+'( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
 
   * Sentinel-1, point, all available images from given beginning time until now
-REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
+'( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-1) AND (producttype:SLC OR producttype:GRD OR producttype:OCN)'
 
   * Sentinel-2, polygon, from given beginning time to given ending time
-REQUEST_STR='( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-2)'
+'( footprint:"Intersects(POLYGON((-180 58.973437549923915,0 58.973437549923915,0 85.71249419049184,-180 85.71249419049184,-180 58.973437549923915)))" OR footprint:"Intersects(POLYGON((0 58.973437549923915,180 58.973437549923915,180 85.71249419049184,0 85.71249419049184,0 58.973437549923915)))" ) AND ( beginPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] AND endPosition:[2016-02-01T00:00:00.000Z TO 2016-02-29T23:59:59.999Z] ) AND (platformname:Sentinel-2)'
 
   * Sentinel-2, point, all available images from given beginning time until now
-REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
+'( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2)'
 
   * Sentinel-2, cloud cover within a given range
-REQUEST_STR='( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 30])'
+'( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 30])'
+
+
+Example to query data
+
+  query_sentinel.sh -u YOUR_USERNAME -p YOUR_PASSWORD -o PREFIX_TO_YOUR_OUTPUT_LIST '( footprint:"Intersects(48.307960, -105.101750)" ) AND ( beginPosition:[2015-06-23T00:00:00.000Z TO NOW] AND endPosition:[2015-06-23T00:00:00.000Z TO NOW] ) AND (platformname:Sentinel-2 AND cloudcoverpercentage:[0 TO 30])'
 
 EOF
 
