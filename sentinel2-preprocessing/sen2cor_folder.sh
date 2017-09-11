@@ -128,15 +128,23 @@ if [[ ! -z ${GRANULES} ]]; then
         if [[ -d "${L1CS[i]}/GRANULE/${IGNORE_DIR}" ]]; then
             # restore the ignore status of granules for new
             # selection             
-            find "${L1CS[i]}/GRANULE/${IGNORE_DIR}" -type d -name "S*L1C*" -print0 | xargs -0 -I dirs mv dirs ${L1CS[i]}/GRANULE/
+            find "${L1CS[i]}/GRANULE/${IGNORE_DIR}" -type d -name "*L1C*" -print0 | xargs -0 -I dirs mv dirs ${L1CS[i]}/GRANULE/
             # rm -rf "${L1CS[i]}/GRANULE/${IGNORE_DIR}"
         fi
 
-        ALL_GRS=($(find "${L1CS[i]}/GRANULE/" -maxdepth 1 -type d -name "S*L1C*"))
+        ALL_GRS=($(find "${L1CS[i]}/GRANULE/" -maxdepth 1 -type d -name "*L1C*"))
         for (( j=0; j<${#ALL_GRS[@]}; ++j ));
         do
             gname=${ALL_GRS[j]}
-            id=$(basename ${gname} | rev | cut -d '_' -f2 | rev)
+
+            # getting the MGRS/Tile ID from the xml file inside the
+            # granule folder.
+            tmpids=($(grep TILE_ID *.xml | cut -d '>' -f2 | cut -d '<' -f1 | rev | cut -d '_' -f2 | rev))
+            if [[ ${#tmpids[@]} -gt 1 ]]; then
+                echo "WARNING: multiple tile IDs found from the xml file/s inside the granule folder! Using the first tile ID!"
+            fi
+            id=${tmpids[0]}
+
             # cut the "T" at the beginning
             id=${id:1}
             In_Array "${id}" "$(echo ${GR_LIST[@]})"
