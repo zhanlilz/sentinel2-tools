@@ -35,9 +35,13 @@ Options
     L1C SAFE folder after successfully finishing sen2cor and
     generating L2A SAFE folder.
 
+  --cmd, optional, full path to the L2A_Process command. Default is
+    simply L2A_Process.
+
 EOF
 
 CLEAN_L1C=0
+CMD="L2A_Process"
 OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule:,clean-l1c -n 'sen2cor_folder.sh' -- "$@"`
 if [[ ! $? -eq 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
@@ -61,6 +65,11 @@ do
             esac ;;
         --clean-l1c )
             CLEAN_L1C=1 ; shift ;;
+        --cmd )
+            case "${2}" in
+                "") shift 2 ;;
+                *) CMD=$${2} ; shift 2 ;;
+            esac ;;
         -- ) shift ; break ;;
         * ) break ;;
     esac
@@ -151,7 +160,7 @@ NUMFILES=${#L1CS[@]}
 for (( i=0; i<${NUMFILES}; ++i ));
 do
     echo "L2A <---- L1C $((i+1)) / ${NUMFILES}: $(basename ${L1CS[i]})"
-    L2A_Process --resolution ${RES} ${L1CS[i]}
+    ${CMD} --resolution ${RES} ${L1CS[i]}
     SEN2COR_EXIT=$?
     if [[ ! -z ${OUTDIR} ]]; then
         TMP=${L1CS[i]}
@@ -166,5 +175,7 @@ do
     echo
 done
 
-# restore old GDAL_DATA after processing with sen2cor
-export GDAL_DATA=${OLD_GDAL_DATA}
+if [[ ! -z ${SEN2COR_HOME} ]]; then
+    # restore old GDAL_DATA after processing with sen2cor
+    export GDAL_DATA=${OLD_GDAL_DATA}
+fi
