@@ -42,7 +42,7 @@ EOF
 
 CLEAN_L1C=0
 CMD="L2A_Process"
-OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule:,clean-l1c -n 'sen2cor_folder.sh' -- "$@"`
+OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule:,clean-l1c,cmd: -n 'sen2cor_folder.sh' -- "$@"`
 if [[ ! $? -eq 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true; 
