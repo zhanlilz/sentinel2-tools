@@ -41,7 +41,7 @@ Options
 EOF
 
 CLEAN_L1C=0
-CMD="L2A_Process"
+SEN2COR_L2A="L2A_Process"
 OPTS=`getopt -o r:o:g: --long resolution:,output-directory:,granule:,clean-l1c,cmd: -n 'sen2cor_folder.sh' -- "$@"`
 if [[ ! $? -eq 0 ]]; then echo "Failed parsing options" >&2 ; echo "${USAGE}" ; exit 1 ; fi
 eval set -- "${OPTS}"
@@ -68,7 +68,7 @@ do
         --cmd )
             case "${2}" in
                 "") shift 2 ;;
-                *) CMD=$${2} ; shift 2 ;;
+                *) SEN2COR_L2A=${2} ; shift 2 ;;
             esac ;;
         -- ) shift ; break ;;
         * ) break ;;
@@ -139,7 +139,7 @@ if [[ ! -z ${GRANULES} ]]; then
 
             # getting the MGRS/Tile ID from the xml file inside the
             # granule folder.
-            tmpids=($(grep TILE_ID *.xml | cut -d '>' -f2 | cut -d '<' -f1 | rev | cut -d '_' -f2 | rev))
+            tmpids=($(grep TILE_ID ${gname}/*.xml | cut -d '>' -f2 | cut -d '<' -f1 | rev | cut -d '_' -f2 | rev))
             if [[ ${#tmpids[@]} -gt 1 ]]; then
                 echo "WARNING: multiple tile IDs found from the xml file/s inside the granule folder! Using the first tile ID!"
             fi
@@ -168,7 +168,7 @@ NUMFILES=${#L1CS[@]}
 for (( i=0; i<${NUMFILES}; ++i ));
 do
     echo "L2A <---- L1C $((i+1)) / ${NUMFILES}: $(basename ${L1CS[i]})"
-    ${CMD} --resolution ${RES} ${L1CS[i]}
+    ${SEN2COR_L2A} --resolution ${RES} ${L1CS[i]}
     SEN2COR_EXIT=$?
     if [[ ! -z ${OUTDIR} ]]; then
         TMP=${L1CS[i]}

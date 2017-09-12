@@ -71,7 +71,12 @@ do
         echo
     fi
 
-    mkdir -p "${DATADIR}/temp"
+    if [[ -d "${DATADIR}/temp" ]]; then
+        rm -rf "${DATADIR}/temp/*"
+    else
+        mkdir -p "${DATADIR}/temp"
+    fi
+
     unzip -q ${ZIPFILES[i]} -d "${DATADIR}/temp"
     SAFE=$(find "${DATADIR}/temp" -maxdepth 1 -name "*.SAFE")
     if [[ -z ${SAFE} ]]; then
