@@ -122,9 +122,18 @@ for envi in ${lnds[@]}; do
     #
     # Now get acquisition date temporarily from the SAFE folder
     # name where the granule resides
-    safesub=$(echo ${envi} | grep -o 'S2A_USER_PRD_MSIL2A_.*\.SAFE' | grep -o 'V.*\.SAFE')
-    year=${safesub:1:4}
-    doy=$(date -d ${safesub:1:8} "+%j")
+    tmp=$(echo ${envi} | grep -o 'S2A_USER_PRD_MSIL2A_.*\.SAFE')
+    if [[ -z ${tmp} ]]; then
+        # not matched, it's new tile-based SAFE format
+        safesub=$(echo ${envi} | grep -o 'MSIL2A_.*')
+        acqstr=${safesub:7:8}
+    else
+        # matched, old scene-based SAFE format
+        safesub=$(echo ${tmp} | grep -o 'V.*\.SAFE')
+        acqstr=${safesub:1:8}
+    fi
+    year=${acqstr:0:4}
+    doy=$(date -d ${acqstr} "+%j")
 
     # No path or row for Sentinel-2 data
     path="000"
