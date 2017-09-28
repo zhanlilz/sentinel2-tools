@@ -11,6 +11,7 @@ import sys
 import os
 import argparse
 import types
+import os.path
 
 import numpy as np
 from osgeo import gdal, gdal_array, osr
@@ -19,6 +20,7 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
+from mpl_toolkits import axes_grid1
 
 gdal.AllRegister()
 
@@ -29,7 +31,9 @@ def getCmdArgs():
     p.add_argument("-o", "--output", dest="output_image", required=True, default=None, metavar="OUTPUT_IMAGE", help="The output image.")
     p.add_argument("-S", "--size", dest="figsize", required=False, type=float, nargs=2, default=(3, 3), metavar="FIGSIZE", help="The size of output figure. Default: (3 in, 3 in)")
 
+    p.add_argument("--nodata", dest="nodata_user", required=False, type=float, default=None, help="Nodata value for all the bands in all the input images designated by user. Overwrite image's own nodata value even if it has a defined one.")
     p.add_argument("--stretch", dest="stretch_range", required=True, type=float, nargs=2, default=None, metavar="STRETCH_RANGE", help="The low and high boundary of input image pixel values to stretch for the output.")
+    p.add_argument("--unique_values", dest="unique_values", required=False, action="store_true", help="If set, draw image assigning a color to each value like a classification map. Only for single input image file.")
 
     p.add_argument("--lat", dest="lat", required=True, type=float, default=None, metavar="LATITUDE", help="Latitude of the center of the output inset.")
     p.add_argument("--lon", dest="lon", required=True, type=float, default=None, metavar="LONGITUDE", help="Longitude of the center of the output inset.")
@@ -41,7 +45,11 @@ def getCmdArgs():
     cmdargs = p.parse_args()
 
     if len(cmdargs.input_image) != 1 and len(cmdargs.input_image) != 3:
+        p.print_help()
         raise RuntimeError("Number of input image/s can only be one file (either single band or RGB bands) or three files in the order of RGB composite.")
+    if len(cmdargs.input_image) != 1 and cmdargs.unique_values:
+        p.print_help()
+        raise RuntimeError("Option --unique_values only works with a single input image file of a single band!")
 
     return cmdargs
 
@@ -132,7 +140,9 @@ def main(cmdargs):
     output_image = cmdargs.output_image
     figsize = cmdargs.figsize
     line_color = cmdargs.line_color
+    nodata_user = cmdargs.nodata_user
     stretch_range = cmdargs.stretch_range
+    unique_values = cmdargs.unique_values
     lat = cmdargs.lat
     lon = cmdargs.lon
     circle_diams = cmdargs.circle_diams
@@ -164,27 +174,36 @@ def main(cmdargs):
             nodata = band.GetNoDataValue()
             if nodata is None:
                 nodata = nodata_def
+            if nodata_user is not None:
+                nodata = nodata_user
             img = band.ReadAsArray()
             img = img[min_line:min_line+out_nline, min_sample:min_sample+out_nsample]
-            img = (img - stretch_range[0]) / (stretch_range[1] - stretch_range[0])
-            img[img<0] = 0
-            img[img>1] = 1
             mask = img != nodata
+
+            if not unique_values:
+                img = (img - stretch_range[0]) / float(stretch_range[1] - stretch_range[0])
+                img[img<0] = 0
+                img[img>1] = 1
+
             inset_data_list.append(img)
             inset_mask_list.append(mask)
         ds = None
 
-    if len(inset_data_list) == 1:
-        inset_mask_list = inset_mask_list * 3
-        inset_data_list = inset_data_list * 3
-
-    if len(inset_data_list) != 3:
-        raise RuntimeError("Total number of bands from the input image/s can only be one or three!")
-        
-    out_mask = reduce(np.logical_and, inset_mask_list)
-    for dat in inset_data_list:
-        dat[np.logical_not(out_mask)] = 0
-    out_image = np.dstack(inset_data_list)
+    if unique_values:
+        if len(inset_data_list) != 1:
+            raise RuntimeError("Option unique_values only works with a single band from a single input image file!")
+        out_mask = inset_mask_list[0]
+        out_image = inset_data_list[0]
+    else:
+        if len(inset_data_list) == 1:
+            inset_mask_list = inset_mask_list * 3
+            inset_data_list = inset_data_list * 3
+        if len(inset_data_list) != 3:
+            raise RuntimeError("Total number of bands from the input image/s can only be one or three!")        
+        out_mask = reduce(np.logical_and, inset_mask_list)
+        for dat in inset_data_list:
+            dat[np.logical_not(out_mask)] = 0
+        out_image = np.dstack(inset_data_list)
 
     utm_zone = int((lon+180)/6) + 1
     ctr_meridian = (utm_zone - 1 + utm_zone) * 6 / 2 - 180
@@ -192,7 +211,17 @@ def main(cmdargs):
                     llcrnrlon=llgeo[0], llcrnrlat=llgeo[1], urcrnrlon=urgeo[0], urcrnrlat=urgeo[1], 
                     resolution="h", suppress_ticks=True)
     fig, ax = plt.subplots(figsize=figsize)
-    imobj = bmobj.imshow(np.flipud(out_image))
+    if unique_values:
+        # draw like a classification map
+        ncls = int(stretch_range[1] - stretch_range[0] + 1)
+        cm = plt.get_cmap("Paired", ncls)
+        cm.set_bad('k', alpha=1)
+        out_image = np.ma.masked_where(np.logical_not(out_mask), out_image)
+        bounds = np.arange(stretch_range[0], stretch_range[1]+2) - 0.5
+        norm = mpl.colors.BoundaryNorm(bounds, cm.N)
+        imobj = bmobj.imshow(np.flipud(out_image), cmap=cm, norm=norm)
+    else:
+        imobj = bmobj.imshow(np.flipud(out_image))
 
     for slen in square_lens:
         if slen == out_imgsize:
@@ -216,7 +245,13 @@ def main(cmdargs):
             bmobj.plot(tmpx, tmpy, latlon=False, linestyle="-", color=line_color)
 
     plt.savefig(output_image, dpi=300, bbox_inches="tight", pad_inches=0.)
-
+    if unique_values:
+        fig, cm_ax = plt.subplots(figsize=(figsize[0], figsize[1]*0.1))
+        # divider = axes_grid1.make_axes_locatable(ax)
+        # cm_ax = divider.append_axes("bottom", 0.4, pad=0.2)
+        cb = fig.colorbar(imobj, cax=cm_ax, ax=cm_ax, orientation="horizontal") 
+        cb.set_ticks(np.arange(stretch_range[0], stretch_range[1]+1))
+        plt.savefig(os.path.splitext(output_image)[0]+"_legend.png", dpi=300, bbox_inches="tight", pad_inches=0.)
 
 if __name__ == "__main__":
     cmdargs = getCmdArgs()
