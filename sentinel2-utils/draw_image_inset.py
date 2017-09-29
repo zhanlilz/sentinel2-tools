@@ -231,7 +231,7 @@ def main(cmdargs):
         tmpgeo = [proj2Geo(input_image[0], x, y) for x, y in zip(tmpx, tmpy )]
         tmplon, tmplat = zip(*tmpgeo)
         tmpx, tmpy = bmobj(tmplon, tmplat)
-        bmobj.plot(tmpx, tmpy, latlon=False, linestyle="-", color=line_color)
+        bmobj.plot(tmpx, tmpy, latlon=False, linestyle="-", color=line_color, linewidth=0.5)
 
     if circle_diams is not None:
         for cdiam in circle_diams:
@@ -242,7 +242,7 @@ def main(cmdargs):
             tmpgeo = [proj2Geo(input_image[0], x, y) for x, y in zip(tmpx, tmpy )]
             tmplon, tmplat = zip(*tmpgeo)
             tmpx, tmpy = bmobj(tmplon, tmplat)
-            bmobj.plot(tmpx, tmpy, latlon=False, linestyle="-", color=line_color)
+            bmobj.plot(tmpx, tmpy, latlon=False, linestyle="-", color=line_color, linewidth=0.5)
 
     plt.savefig(output_image, dpi=300, bbox_inches="tight", pad_inches=0.)
     if unique_values:
