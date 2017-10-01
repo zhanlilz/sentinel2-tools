@@ -162,10 +162,17 @@ def main(cmdargs):
         geo_trans = ds.GetGeoTransform()
         proj_ref = ds.GetProjectionRef()
 
-        out_nsample = int(out_imgsize / geo_trans[1])
-        out_nline = int(-1 * out_imgsize / geo_trans[5])
+        out_nsample = int(out_imgsize / geo_trans[1]) + 0
+        out_nline = int(-1 * out_imgsize / geo_trans[5]) + 0
         min_sample = csample - int(out_nsample*0.5)
         min_line = cline - int(out_nline*0.5)
+        max_sample = min_sample + out_nsample
+        max_line = min_line + out_nline
+        min_sample = min_sample if min_sample > 0 else 0
+        min_line = min_line if min_line > 0 else 0
+        max_sample = max_sample if max_sample < ds.RasterXSize else ds.RasterXSize
+        max_line = max_line if max_line < ds.RasterYSize else ds.RasterYSize
+
         llgeo = pixel2Geo(imgf, min_sample, min_line+out_nline)
         urgeo = pixel2Geo(imgf, min_sample+out_nsample, min_line)
         
@@ -177,7 +184,7 @@ def main(cmdargs):
             if nodata_user is not None:
                 nodata = nodata_user
             img = band.ReadAsArray()
-            img = img[min_line:min_line+out_nline, min_sample:min_sample+out_nsample]
+            img = img[min_line:max_line, min_sample:max_sample]
             mask = img != nodata
 
             if not unique_values:
