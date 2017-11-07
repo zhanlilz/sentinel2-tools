@@ -295,7 +295,6 @@ def main(cmdargs):
             for irow, row in enumerate(out_stats[fidx][diam]):
                 sys.stdout.write("{0:s},{1:.3f},{2:d},{3[0]:.3f},{3[1]:.3f},{3[2]:.0f}\n".format(outf, diam, irow+1, row))
 
-2
 if __name__ == "__main__":
     cmdargs = getCmdArgs()
     main(cmdargs)
