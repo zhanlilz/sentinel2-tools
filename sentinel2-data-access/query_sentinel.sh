@@ -41,6 +41,9 @@ Options
     files will be listed in a single file of the given outprefix
     without being sorted or split.
 
+  -M, --meta, optional
+    Turn on the output of metadata of found image records to a CSV file.
+
   -q, --quiet, optional
     Disable confirmation of inputs by the user and run query quietly.
 
@@ -69,8 +72,9 @@ Example to query data
 EOF
 
 DISKSPACE=-1
+META=0
 QUIET=0
-OPTS=`getopt -o u:p:o:d:q --long user:,password:,outprefix:,quiet,disk: -n 'query_sentinel.sh' -- "$@"`
+OPTS=`getopt -o u:p:o:d:M:q --long user:,password:,outprefix:,quiet,disk:,meta -n 'query_sentinel.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; echo "${USAGE}" ; exit 1 ; fi
 substr_exist ()
 {
@@ -114,6 +118,8 @@ do
                 "") shift 2 ;;
                 *) DISKSPACE=${2} ; shift 2 ;;
             esac ;;
+	-M | --meta )
+	    META=1 ; shift ;;
         -q | --quiet )
             QUIET=1 ; shift ;;
         -- ) shift ; break ;;
@@ -126,6 +132,8 @@ if [[ ${#} < ${MINPARAMS} ]]; then
     exit 1
 fi
 REQUEST_STR=${1}
+
+CMD_DIR=$(dirname ${0})
 
 QUERY_PREFIX='https://scihub.copernicus.eu/dhus/search?q='
 QUERY_SUFFIX=''
@@ -140,6 +148,7 @@ fi
 # additional files to write for query
 QUERY_RESULT="${OUTPREFIX}.query.raw"
 LOG_FILE="${OUTPREFIX}.query.log"
+META_CSV="${OUTPREFIX}_meta.csv"
 
 # calculate disk space
 DISKSPACE=$(echo ${DISKSPACE} | bc)
@@ -170,6 +179,7 @@ Free diskspace:
 Additional output files from the query will be in the same folder as your ${OUTPREFIX}
 1. log file of wget query: ${LOG_FILE} 
 2. raw outputs from the query: ${QUERY_RESULT}
+3. metadata of found image records from the query if choosing to output: ${META_CSV}
 
 EOF
 
@@ -198,6 +208,10 @@ QUERY_CNT=0
 QUERY_MAX=10000
 # Query from the server
 > ${QUERY_RESULT}
+if [[ ${META} -eq 1 ]]; then
+	> ${META_CSV}
+fi
+
 while [[ ${GOT_ALL} -eq 0 ]]; do
     QUERY_CNT=$((QUERY_CNT+1))
     QUERY_STR="${QUERY_PREFIX}${REQUEST_STR}${QUERY_SUFFIX}&rows=${QUERY_REC_LIMIT}&start=${START_REC}"
@@ -220,6 +234,19 @@ while [[ ${GOT_ALL} -eq 0 ]]; do
     fi
     if [[ ${QUERY_CNT} -eq 1 ]]; then
         NREC_TOT=$(grep "<opensearch:totalResults>" "${QUERY_RESULT}.tmp" | cut -f 2 -d'>' | cut -f 1 -d'<')
+    fi
+
+    if [[ ${META} -eq 1 ]]; then
+	    csv_head=0
+	    if [[ ${START_REC} -eq 0 ]]; then
+		    csv_head=1
+	    fi
+	    ${CMD_DIR}/parse_query_result_xml.sh ${QUERY_RESULT}.tmp ${META_CSV}.${START_REC} ${csv_head}
+	    cat ${META_CSV}.${START_REC} >> ${META_CSV}
+
+# 	    if [[ ${START_REC} -eq 700 ]]; then exit; fi
+
+	    rm -f ${META_CSV}.${START_REC}
     fi
 
     cat "${QUERY_RESULT}.tmp" >> "${QUERY_RESULT}"
@@ -248,8 +275,9 @@ N=`cat $OUTPREFIX | wc -l`
 echo $N files found
 
 if [[ ${DISKSPACE} -eq -1 ]]; then
+    mv ${OUTPREFIX} ${OUTPREFIX}.txt
     echo "No disk space specified; All found in a single list file"
-    echo "    ${OUTPREFIX}"
+    echo "    ${OUTPREFIX}.txt"
     exit
 fi
 
