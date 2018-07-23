@@ -127,7 +127,7 @@ if [[ ${#} < ${MINPARAMS} ]]; then
 fi
 REQUEST_STR=${1}
 
-QUERY_PREFIX='https://scihub.copernicus.eu/apihub/search?q='
+QUERY_PREFIX='https://scihub.copernicus.eu/dhus/search?q='
 QUERY_SUFFIX=''
 QUERY_REC_LIMIT=100
 
