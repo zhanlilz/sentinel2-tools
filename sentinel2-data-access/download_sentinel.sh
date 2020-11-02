@@ -1,7 +1,7 @@
 #!/bin/bash
 
 read -d '' USAGE <<EOF
-Usage: download_sentinel_bnu.sh [options] URL_LIST_FILE DIRECTORY
+Usage: download_sentinel.sh [options] URL_LIST_FILE DIRECTORY
 
 Download sentinel data to the directory, DIRECTORY given the list of
 download URLs in the file, URL_LIST_FILE, one URL per line

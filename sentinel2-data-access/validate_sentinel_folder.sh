@@ -1,7 +1,7 @@
 #!/bin/bash
 
 read -d '' USAGE <<EOF 
-validate_sentinel_folder_bnu.sh [options] SEN_DATA_DIR COR_FILE
+validate_sentinel_folder.sh [options] SEN_DATA_DIR COR_FILE
 
 Validate the integrity of Sentinel data files in the folder SEN_DATA_DIR and
 write the list of corrupted file names to an ASCII file COR_FILE
@@ -22,7 +22,7 @@ EOF
 VERIFIED_RECORD="checksum_verified"
 
 CLEAN=0
-OPTS=`getopt -o cp:: --long clean,pattern:: -n 'validate_sentinel_folder_bnu.sh' -- "$@"`
+OPTS=`getopt -o cp:: --long clean,pattern:: -n 'validate_sentinel_folder.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; exit 1 ; fi
 eval set -- "${OPTS}"
 while true;

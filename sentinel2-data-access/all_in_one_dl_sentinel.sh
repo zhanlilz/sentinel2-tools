@@ -8,7 +8,7 @@
 # Created: Fri May 13 13:39:33 EDT 2016
 
 read -d '' USAGE <<EOF
-all_in_one_dl_sentinel_bnu.sh [options] DL_LIST DIR
+all_in_one_dl_sentinel.sh [options] DL_LIST DIR
 
 Given DL_LIST, the file of list of Sentinel-2 data download links,
 repeat the five steps to ensure all data are downloaded correctly to
@@ -35,7 +35,7 @@ RECURSIVE=0 # download files using wget --recursive option
 VERBOSE=0 # verbose mode, output more detailed information to the screen
 MAXNUMRUN=15 # maximum number of tries of running the five steps
 
-OPTS=`getopt -o rv --long user:,password:,recursive,verbose -n 'all_in_one_dl_sentinel_bnu.sh' -- "$@"`
+OPTS=`getopt -o rv --long user:,password:,recursive,verbose -n 'all_in_one_dl_sentinel.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; echo "${USAGE}" ; exit 1 ; fi
 substr_exist ()
 {
