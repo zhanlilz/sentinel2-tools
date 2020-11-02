@@ -28,8 +28,10 @@ Options
     Password of ESA Science Data Hub account
 
   -o, --outprefix, required
-    Prefix of output file of list of found images, CANNOT be a
-    directory
+    Prefix of output file of list of found images. It can include an ouput
+    directory as the leading part of the prefix string. However, the entire
+    prefix string itself CANNOT be just a directory without any string trailing
+    the directory. 
 
   -d, --disk
     Disk space (unit, byte) to hold part of the image data, used to
