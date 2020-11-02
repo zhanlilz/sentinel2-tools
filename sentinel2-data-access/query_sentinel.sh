@@ -178,6 +178,22 @@ Free diskspace:
 
 ---------------------------------------------
 
+List of download URLs of found Sentinel-2 products will be
+
+${OUTPREFIX}.txt
+
+OR 
+
+${OUTPREFIX}_1.txt
+${OUTPREFIX}_2.txt
+.
+.
+.
+${OUTPREFIX}_N.txt
+if URLs need to be split into N lists due to the given disk space limit.
+
+---------------------------------------------
+
 Additional output files from the query will be in the same folder as your ${OUTPREFIX}
 1. log file of wget query: ${LOG_FILE} 
 2. raw outputs from the query: ${QUERY_RESULT}
