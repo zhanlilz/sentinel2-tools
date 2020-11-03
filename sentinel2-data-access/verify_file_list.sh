@@ -12,10 +12,10 @@ Find files missing from the dowload link list
 Options:
 
   -p, --pattern, required, a string of file name pattern for searching
-	files to validate; e.g. -p"*.zip" or --pattern"*.zip"; default
-	file name patterns for searching is: Pattern 1: *.zip in the
-	given folder, NOT in subfolders.  Pattern 2: \$value in the
-	given folder and all its subfolders.
+    files to validate; e.g. -p"*.zip" or --pattern"*.zip"; default
+    file name patterns for searching is: Pattern 1: *.zip in the
+    given folder, NOT in subfolders.  Pattern 2: \$value in the
+    given folder and all its subfolders.
 
 EOF
 

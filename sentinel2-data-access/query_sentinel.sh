@@ -120,8 +120,8 @@ do
                 "") shift 2 ;;
                 *) DISKSPACE=${2} ; shift 2 ;;
             esac ;;
-	-M | --meta )
-	    META=1 ; shift ;;
+        -M | --meta )
+            META=1 ; shift ;;
         -q | --quiet )
             QUIET=1 ; shift ;;
         -- ) shift ; break ;;
@@ -227,7 +227,7 @@ QUERY_MAX=10000
 # Query from the server
 > ${QUERY_RESULT}
 if [[ ${META} -eq 1 ]]; then
-	> ${META_CSV}
+    > ${META_CSV}
 fi
 
 while [[ ${GOT_ALL} -eq 0 ]]; do
@@ -255,16 +255,16 @@ while [[ ${GOT_ALL} -eq 0 ]]; do
     fi
 
     if [[ ${META} -eq 1 ]]; then
-	    csv_head=0
-	    if [[ ${START_REC} -eq 0 ]]; then
-		    csv_head=1
-	    fi
-	    ${CMD_DIR}/parse_query_result_xml.sh ${QUERY_RESULT}.tmp ${META_CSV}.${START_REC} ${csv_head}
-	    cat ${META_CSV}.${START_REC} >> ${META_CSV}
+        csv_head=0
+        if [[ ${START_REC} -eq 0 ]]; then
+            csv_head=1
+        fi
+        ${CMD_DIR}/parse_query_result_xml.sh ${QUERY_RESULT}.tmp ${META_CSV}.${START_REC} ${csv_head}
+        cat ${META_CSV}.${START_REC} >> ${META_CSV}
 
-# 	    if [[ ${START_REC} -eq 700 ]]; then exit; fi
+#       if [[ ${START_REC} -eq 700 ]]; then exit; fi
 
-	    rm -f ${META_CSV}.${START_REC}
+        rm -f ${META_CSV}.${START_REC}
     fi
 
     cat "${QUERY_RESULT}.tmp" >> "${QUERY_RESULT}"

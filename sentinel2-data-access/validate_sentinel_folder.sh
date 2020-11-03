@@ -9,13 +9,13 @@ write the list of corrupted file names to an ASCII file COR_FILE
 Options:
 
   -c, --clean, optional: if set, remove corrupted files after checking; e.g.
-	-c or --clean; default: NOT remove.
+    -c or --clean; default: NOT remove.
 
   -p, --pattern, optional: a string of file name pattern for searching files
-	to validate; e.g. -p"*.zip" or --pattern"*.zip"; default file name patterns
-	for searching is:     
-	Pattern 1: *.zip in the given folder, NOT in subfolders.     
-	Pattern 2: \$value in the given folder and all its subfolders.
+    to validate; e.g. -p"*.zip" or --pattern"*.zip"; default file name patterns
+    for searching is:     
+    Pattern 1: *.zip in the given folder, NOT in subfolders.     
+    Pattern 2: \$value in the given folder and all its subfolders.
 
 EOF
 
