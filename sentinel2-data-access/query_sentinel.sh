@@ -76,7 +76,7 @@ EOF
 DISKSPACE=-1
 META=0
 QUIET=0
-OPTS=`getopt -o u:p:o:d:M:q --long user:,password:,outprefix:,quiet,disk:,meta -n 'query_sentinel.sh' -- "$@"`
+OPTS=`getopt -o u:p:o:d:Mq --long user:,password:,outprefix:,quiet,disk:,meta -n 'query_sentinel.sh' -- "$@"`
 if [[ $? != 0 ]]; then echo "Failed parsing options." >&2 ; echo "${USAGE}" ; exit 1 ; fi
 substr_exist ()
 {
