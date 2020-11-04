@@ -233,7 +233,7 @@ fi
 while [[ ${GOT_ALL} -eq 0 ]]; do
     QUERY_CNT=$((QUERY_CNT+1))
     QUERY_STR="${QUERY_PREFIX}${REQUEST_STR}${QUERY_SUFFIX}&rows=${QUERY_REC_LIMIT}&start=${START_REC}"
-    echo -n "Start querying records at ${START_REC} ... "
+    echo -n "Start querying records at ${START_REC} "
     wget --no-check-certificate --user=${USER} --password=${PSW} --output-file="${LOG_FILE}" -O "${QUERY_RESULT}.tmp" "${QUERY_STR}"
     WGET_EXIT=$?
     if [[ ${WGET_EXIT} -ne 0 ]]; then
@@ -253,6 +253,7 @@ while [[ ${GOT_ALL} -eq 0 ]]; do
     if [[ ${QUERY_CNT} -eq 1 ]]; then
         NREC_TOT=$(grep "<opensearch:totalResults>" "${QUERY_RESULT}.tmp" | cut -f 2 -d'>' | cut -f 1 -d'<')
     fi
+    echo -n "/ ${NREC_TOT} ... "
 
     if [[ ${META} -eq 1 ]]; then
         csv_head=0
